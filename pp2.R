@@ -4,7 +4,7 @@ library(roahd)
 library(dplyr)
 library(stringr)
 
-setwd("C:/Users/rozzu/OneDrive/Desktop/NPS-project")
+setwd("~/Documents/Politecnico/Magistrale/Non Parametric Statistics/PROJECT")
 PP_2 <- read_csv("PP_2.csv")
 
 #SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
@@ -15,6 +15,12 @@ PP_2 <- read_csv("PP_2.csv")
 
 
 data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:83)]
+
+# impongo unica classe USA anche per United States, va fatto per tutti i doppioni
+data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
+data[which(data$CountryName_FromSource == 'IT'), ]$CountryName_FromSource = 'Italy'
+#CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
+
 
 #cosa stranissima, ad Hong Kong c'Ã¨ il massimo del numero di volontari 188463
 #ma con solo 1 oggetto raccolto, non Ã¨ abbastanza strano?
@@ -95,6 +101,10 @@ newdata[which(newdata$CountryName_FromSource == 'Western Greece and the Ionian')
 newdata[which(newdata$CountryName_FromSource == 'USVI'), ]$CountryName_FromSource = 'UK'
 newdata[which(newdata$CountryName_FromSource == 'Saint Lucia'), ]$CountryName_FromSource = 'St Lucia'
 newdata[which(newdata$CountryName_FromSource == 'Federal Territory of Kuala Lumpur'), ]$CountryName_FromSource = 'Malaysia'
+newdata[which(newdata$CountryName_FromSource == 'Madrid'), ]$CountryName_FromSource = 'Spain'
+newdata[which(newdata$CountryName_FromSource == 'Hong Kong'), ]$CountryName_FromSource = 'China'
+newdata[which(newdata$CountryName_FromSource == 'MalÃƒÂ©'), ]$CountryName_FromSource = 'Maldives'
+newdata[which(newdata$CountryName_FromSource == 'Macedonia (FYROM)'), ]$CountryName_FromSource = 'Macedonia'
 
 
 levels(factor(newdata$CountryName_FromSource))
@@ -106,6 +116,23 @@ newdata=newdata[!(newdata$CountryName_FromSource=='43000'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='92000'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='ASCN 1ZZ'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='STHL 1ZZ'),]
+
+
+##SEMBRA OKAY ORA
+#facciamo qualche analisi: prima cosa faccio uno scatterplot
+#num volontari vs qtÃ  plastica raccolta
+
+plot(newdata$TotalVolunteers,newdata$Totalltems_EventRecord)
+
+
+##PARENTESI COSI' SI SALVANO LE COSE
+#save(newdata,file="cleandata.Rdata")
+##COSI' SI RIAPRONO
+#library(rio)
+#dati=import("cleandata.Rdata")
+
+
+
 
 #Michael
 
@@ -125,10 +152,11 @@ length(na.omit(newdata$Location)) #1569 senza Location ma almeno uno tra Country
 #alla fine avremo un dataset che ha tutta la colonna Location,
 #tutta la colonna CountryName e almeno una tra i due SubCountry_L1/L2
 
+
 #sotto codice dove chi non ha CountryName_FromSource ma ha Location, mette CountryName_FromSource=l'ultima "parola"/"sigla" 
 #della stringa "Location" che corrisponde al Country (ho controllato uno per uno)
-#(considero stringhe Location diverse da 1, le faccio dopo, capire il perchè vedendo il codice sotto ma il succo 
-#è che la singola stringa non corrisponde sempre al Country ma a volte a un SubCountry)
+#(considero stringhe Location diverse da 1, le faccio dopo, capire il perch? vedendo il codice sotto ma il succo 
+#? che la singola stringa non corrisponde sempre al Country ma a volte a un SubCountry)
 
 for (i in 1:length(newdata$Location)) {
   if((is.na(newdata$Location)[i]==FALSE)&(length(unlist(strsplit(newdata$Location[i], ", ")))!=1)&(is.na(newdata$CountryName_FromSource[i])==TRUE))
@@ -156,7 +184,7 @@ for (i in 1:length(newdata$OBJECTID)) {
 }
 #ora tutte le righe hanno la Location
 location=aggregate(newdata$Location, by=list(zona=newdata$Location), FUN=length)
-length(location$zona) #ora 3604 location (prima 3337), i 5520 NA di prima hanno dato 267 zone in più
+length(location$zona) #ora 3604 location (prima 3337), i 5520 NA di prima hanno dato 267 zone in pi?
 #ora length(newdata$Location)-sum(location$x)= 0 NA
 
 #codice sotto: ho aggiunto con la pazienza di Dio a chi aveva solo una "parola" in Location
@@ -289,8 +317,6 @@ for (i in 1:length(newdata$Location)) {
 #capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 3328 righe o invece eliminare 
 #la colonna Length
 
-
-
 ###########
 #SECTION GRAFICI (MICHI, Michael(outlier))
 dati_2015 = newdata[which(newdata$Year=="2015"), ]
@@ -300,7 +326,7 @@ zeros = rep(0, length(nomi_stati))
 stati_fda = data.frame(nomi_stati)
 #length(nomi_stati) 2015=20, 2016=93, 2017=103, 2018=113
 #da capire se tenere anche il 2015 o considerare solo gli ultimi tre anni dove abbiamo 
-#più o meno lo stesso numero di stati
+#pi? o meno lo stesso numero di stati
 
 #dataframe stati/mesi
 for (i in 1:12){
@@ -355,6 +381,10 @@ stati[which(stati$x==max(stati$x)),1] #outlier Ghana
 Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #38 riga del Ghana
 sum(Ghana==0) #42 su 48, solo 6 valori in 4 anni e uno di questi è il più alto tra tutti i paesi
 matplot(t(stati_fda[-38 ,-1]), type='l')
+
+Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #61 riga del Ghana
+sum(Ghana==0) #42 su 48, solo 6 valori in 4 anni e uno di questi ? il pi? alto tra tutti i paesi
+matplot(t(stati_fda[-61 ,-1]), type='l')
 title('Country/Month 2015-2018')
 
 #nuovo dataset senza Ghana
@@ -364,6 +394,9 @@ stati_new[which(stati_new$x==max(stati_new$x)),1]
 Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #88 riga delle Philippines
 sum(Philippines==0) #22 su 48, 26 valori da metà del secondo anno in poi
 matplot(t(stati_fda[-c(38,88) ,-1]), type='l')
+Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #119 riga delle Philippines
+sum(Philippines==0) #22 su 48, 26 valori da met? del secondo anno in poi
+matplot(t(stati_fda[-c(61,119) ,-1]), type='l')
 title('Country/Month 2015-2018')
 
 stati_new1=stati_new[-which(stati_new$Country=='Philippines'),]
