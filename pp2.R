@@ -7,11 +7,42 @@ library(stringr)
 setwd("~/Documents/Politecnico/Magistrale/Non Parametric Statistics/PROJECT")
 PP_2 <- read_csv("PP_2.csv")
 
+#SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
+
+###SUBSECTION: pulizia kontatti!!11!!
+##TODO: ricordarsi di cambiare i nomi delle colonne di sto dataset perch� fanno vomitare
+##TODO: scatterplot cose raccolte vs num di volontari
+
+
 data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:83)]
+<<<<<<< HEAD
 # impongo unica classe USA anche per United States, va fatto per tutti i doppioni
 data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
 data[which(data$CountryName_FromSource == 'IT'), ]$CountryName_FromSource = 'Italy'
 #CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
+=======
+
+#cosa stranissima, ad Hong Kong c'è il massimo del numero di volontari 188463
+#ma con solo 1 oggetto raccolto, non è abbastanza strano?
+#inoltre ci sono un sacco di NA anche in TotalWidth quindi non abbiamo tutte le aree
+#e tanti NA anche in CountryName_FromSource quindi nell'aggregate sotto della Michi non ci sono
+#tutti i raggrupamenti
+
+#abbiamo due latitudini e due longitudini che sono praticamente uguali perchè una corrisponde
+#alla zona e l'altra allo stato, possiamo decidere di tenere sono lo stato secondo me in modo 
+#da poter fare un'analisi più "interna", tipo negli USA, analizzando i SubCountry
+
+#"Day" non so quanto sia utile dato che rappresenta il giorno del mese ma non ci sono tutti
+#per nessun mese e nessun stato, anzi alcuni giorni sono uguali e corrispondono a diverse zone
+#secondo me possiamo eliminarlo 
+
+#data$TotalClassifiedItems_EC2020 non ho capito cosa rappresenta
+#CAMI(feat MICHI): rappresenta come alcuni rifiuti sono stati catalogati, per ora non è utile
+#ma ce lo teniamo buono
+
+#"Organization" ci serve? ci sono un sacco di NA che non possiamo recuperare
+
+>>>>>>> aba0c5c58dda8827965b30c80df386ad8df3eab0
 
 #CAMI: sposto questa parte qua così pulisco prima i NAN
 sum(is.na(data$TotalVolunteers))
@@ -26,6 +57,10 @@ View(newdata)
 levels(factor(newdata$CountryName_FromSource))
 
 #CAMI: queste etichette andavano cambiate per omonimia o cose no sense(tipo oslo municipality)
+#impongo unica classe USA anche per United States, va fatto per tutti i doppioni
+data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
+data[which(data$CountryName_FromSource == 'Italy'), ]$CountryName_FromSource = 'IT'
+#CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
 newdata[which(newdata$CountryName_FromSource == 'BA'), ]$CountryName_FromSource = 'Bosnia Erzegovina'
 newdata[which(newdata$CountryName_FromSource == 'BE'), ]$CountryName_FromSource = 'Belgium'
 newdata[which(newdata$CountryName_FromSource == 'BG'), ]$CountryName_FromSource = 'Bulgaria'
@@ -207,6 +242,14 @@ for (i in 1:length(newdata$Location)) {
       newdata$CountryName_FromSource[i]="United Arab Emirates"
 }
 
+nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
+nrow(newdata[na.omit(newdata$Location),]) #48001
+#finalmente abbiamo un dataset senza NA n� nella colonna Location n� nella colonna CountryName_FromSource
+
+newdata=newdata[,-c(1,3,11,13)]
+colnames(newdata)[c(2,3,4,9,17,19,20)] <- c("Country","SubCountry1","SubCountry2","Length","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal")
+
+
 #alcuni SubCountry_L1 sono a sigla altri nome intero tipo CA=California, bisogna con pazienza 
 #metterli uguali per poter magari fare degli aggregate o confrontare stessi SubCountry
 #a prima occhiata sembrano solo i primi 2121 da aggiustare che sono con la sigla mentre tutti gli
@@ -215,6 +258,7 @@ for (i in 1:length(newdata$Location)) {
 
 #####SUBSECTION: ANALISI AREA (Michael)
 
+<<<<<<< HEAD
 # newdata1 <- newdata[!is.na(newdata$TotalWidth_m),] #-49894 dati!! contiene solo 2121 dati
 #significa che 49894 righe non hanno il dato larghezza e quindi non possiamo calcolare 
 #la superificie quindi rende le tre colonne larghezza, lunghezza e superficie inutili, 
@@ -246,6 +290,11 @@ for (i in 1:length(data$OBJECTID)) {
 #ma ce lo teniamo buono
 
 #"Organization" ci serve? ci sono un sacco di NA che non possiamo recuperare
+=======
+#sum(newdata$Length==0) 3328 con lunghezza 0
+#capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 3328 righe o invece eliminare 
+#la colonna Length
+>>>>>>> aba0c5c58dda8827965b30c80df386ad8df3eab0
 
 
 ###########
