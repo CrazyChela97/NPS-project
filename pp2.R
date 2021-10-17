@@ -18,9 +18,6 @@ data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:83)]
 
 #cosa stranissima, ad Hong Kong c'è il massimo del numero di volontari 188463
 #ma con solo 1 oggetto raccolto, non è abbastanza strano?
-#inoltre ci sono un sacco di NA anche in TotalWidth quindi non abbiamo tutte le aree
-#e tanti NA anche in CountryName_FromSource quindi nell'aggregate sotto della Michi non ci sono
-#tutti i raggrupamenti
 
 #abbiamo due latitudini e due longitudini che sono praticamente uguali perchè una corrisponde
 #alla zona e l'altra allo stato, possiamo decidere di tenere sono lo stato secondo me in modo 
@@ -95,7 +92,10 @@ newdata[which(newdata$CountryName_FromSource == 'Western Greece and the Ionian')
 newdata[which(newdata$CountryName_FromSource == 'USVI'), ]$CountryName_FromSource = 'UK'
 newdata[which(newdata$CountryName_FromSource == 'Saint Lucia'), ]$CountryName_FromSource = 'St Lucia'
 newdata[which(newdata$CountryName_FromSource == 'Federal Territory of Kuala Lumpur'), ]$CountryName_FromSource = 'Malaysia'
-
+newdata[which(newdata$CountryName_FromSource == 'Madrid'), ]$CountryName_FromSource = 'Spain'
+newdata[which(newdata$CountryName_FromSource == 'Hong Kong'), ]$CountryName_FromSource = 'China'
+newdata[which(newdata$CountryName_FromSource == 'Malé'), ]$CountryName_FromSource = 'Maldives'
+newdata[which(newdata$CountryName_FromSource == 'Macedonia (FYROM)'), ]$CountryName_FromSource = 'Macedonia'
 
 levels(factor(newdata$CountryName_FromSource))
 
@@ -106,6 +106,15 @@ newdata=newdata[!(newdata$CountryName_FromSource=='43000'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='92000'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='ASCN 1ZZ'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='STHL 1ZZ'),]
+
+##SEMBRA OKAY ORA
+#facciamo qualche analisi: prima cosa faccio uno scatterplot
+#num volontari vs qt� plastica raccolta
+
+plot(newdata$TotalVolunteers,newdata$Totalltems_EventRecord) #palesi outlier da indagare bene
+#tipo cosa stranissima, ad Hong Kong c'è il massimo del numero di volontari 188463
+#ma con solo 1 oggetto raccolto, non è abbastanza strano?
+
 
 #Michael
 
@@ -282,6 +291,13 @@ for (i in 1:length(newdata$Location)) {
   if(newdata$SubCountry1[i]=="WAL")
     newdata$SubCountry1[i]="Wallonia"
 }
+
+
+##PARENTESI COSI' SI SALVANO LE COSE
+#save(newdata,file="cleandata.Rdata")
+##COSI' SI RIAPRONO
+#library(rio)
+#dati=import("cleandata.Rdata")
 
 #####SUBSECTION: ANALISI AREA (Michael)
 
