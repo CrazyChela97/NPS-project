@@ -218,26 +218,21 @@ nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
 nrow(newdata[na.omit(newdata$Location),]) #48001
 #finalmente abbiamo un dataset senza NA nè nella colonna Location nè nella colonna CountryName_FromSource
 
+newdata=newdata[,-c(1,3,11,13)]
+colnames(newdata)[c(2,3,4,9,17,19,20)] <- c("Country","SubCountry1","SubCountry2","Length","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal")
+
+
 #alcuni SubCountry_L1 sono a sigla altri nome intero tipo CA=California, bisogna con pazienza 
 #metterli uguali per poter magari fare degli aggregate o confrontare stessi SubCountry
 #a prima occhiata sembrano solo i primi 2121 da aggiustare che sono con la sigla mentre tutti gli
 #altri hanno il nome completo
 
 
-
 #####SUBSECTION: ANALISI AREA (Michael)
 
-# newdata1 <- newdata[!is.na(newdata$TotalWidth_m),] #-49894 dati!! contiene solo 2121 dati
-#significa che 49894 righe non hanno il dato larghezza e quindi non possiamo calcolare 
-#la superificie quindi rende le tre colonne larghezza, lunghezza e superficie inutili, 
-#questo secondo me è un problema perchè avremmo potuto fare delle analisi tipo volontari vs area
-#o quantità di plastica vs area
-
-
-#calcolo superficie totale, TotalArea_Sq_m sono tutti NA, pu? essere utile
-for (i in 1:length(data$OBJECTID)) {
-  data$TotalArea_Sq_m[i]=data$TotalWidth_m[i]*data$TotalLength_m[i]
-}
+#sum(newdata$Length==0) 3328 con lunghezza 0
+#capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 3328 righe o invece eliminare 
+#la colonna Length
 
 
 ###########
