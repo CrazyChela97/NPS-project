@@ -156,7 +156,7 @@ for (i in 1:length(newdata$OBJECTID)) {
 }
 #ora tutte le righe hanno la Location
 location=aggregate(newdata$Location, by=list(zona=newdata$Location), FUN=length)
-length(location$zona) #ora 3604 location (prima 3337), i 5520 NA di prima hanno dato 267 zone in più
+length(location$zona) #ora 3603 location (prima 3337), i 5520 NA di prima hanno dato 266 zone in più
 #ora length(newdata$Location)-sum(location$x)= 0 NA
 
 #codice sotto: ho aggiunto con la pazienza di Dio a chi aveva solo una "parola" in Location
