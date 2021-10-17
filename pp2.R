@@ -51,8 +51,8 @@ levels(factor(newdata$CountryName_FromSource))
 
 #CAMI: queste etichette andavano cambiate per omonimia o cose no sense(tipo oslo municipality)
 #impongo unica classe USA anche per United States, va fatto per tutti i doppioni
-data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
-data[which(data$CountryName_FromSource == 'Italy'), ]$CountryName_FromSource = 'IT'
+newdata[which(newdata$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
+newdata[which(newdata$CountryName_FromSource == 'Italy'), ]$CountryName_FromSource = 'IT'
 #CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
 newdata[which(newdata$CountryName_FromSource == 'BA'), ]$CountryName_FromSource = 'Bosnia Erzegovina'
 newdata[which(newdata$CountryName_FromSource == 'BE'), ]$CountryName_FromSource = 'Belgium'
@@ -93,7 +93,7 @@ newdata[which(newdata$CountryName_FromSource == 'IE'), ]$CountryName_FromSource 
 newdata[which(newdata$CountryName_FromSource == 'Micronesia, Federated States of'), ]$CountryName_FromSource = 'Micronesia'
 newdata[which(newdata$CountryName_FromSource == 'Western Greece and the Ionian'), ]$CountryName_FromSource = 'Greece'
 newdata[which(newdata$CountryName_FromSource == 'USVI'), ]$CountryName_FromSource = 'UK'
-newdata[which(newdata$CountryName_FromSource == 'Saint Lucia'), ]$CountryName_FromSource = 'USA'
+newdata[which(newdata$CountryName_FromSource == 'Saint Lucia'), ]$CountryName_FromSource = 'St Lucia'
 newdata[which(newdata$CountryName_FromSource == 'Federal Territory of Kuala Lumpur'), ]$CountryName_FromSource = 'Malaysia'
 
 
@@ -122,10 +122,7 @@ length(na.omit(newdata$Location)) #1569 senza Location ma almeno uno tra Country
 #o solo 1, o 2, o tutte 3 
 
 #riempio almeno tutta la colonna Location e CountryName che secondo me saranno quelle che useremo  
-#secondo me si possono eliminare i SubCountry_L1/L2 che hanno entrambi NA perchè non si possono recuperare, 
-#a differenza del CountryName che si recupera da chi ha almeno uno tra Location, SubCountry_L1/L2,
-#inoltre abbiamo Latitudine e Longitudine di almeno un SubCountry che sono pressochè identici quindi
-#non c'è bisogno di averli entrambi, quindi alla fine avremo un dataset che ha tutta la colonna Location,
+#alla fine avremo un dataset che ha tutta la colonna Location,
 #tutta la colonna CountryName e almeno una tra i due SubCountry_L1/L2
 
 #sotto codice dove chi non ha CountryName_FromSource ma ha Location, mette CountryName_FromSource=l'ultima "parola"/"sigla" 
@@ -227,12 +224,71 @@ colnames(newdata)[c(2,3,4,9,17,19,20)] <- c("Country","SubCountry1","SubCountry2
 #a prima occhiata sembrano solo i primi 2121 da aggiustare che sono con la sigla mentre tutti gli
 #altri hanno il nome completo
 
+sum(is.na(newdata$SubCountry1)==TRUE) #c'è solo 1 SubCountry1 che è NA
+which(is.na(newdata$SubCountry1)==TRUE) #riga 1206
+newdata$SubCountry1[1206]="NA"
+sum(is.na(newdata$SubCountry2)==TRUE) #1569 praticamente abbiamo quasi tutto il dataset con tutte le 4 colonne
+#Location, Country, SubCountry1 e SubCountry2. 
+
+for (i in 1:length(newdata$Location)) {
+  if(newdata$SubCountry1[i]=="CA")
+    newdata$SubCountry1[i]="California"
+  if(newdata$SubCountry1[i]=="OR")
+    newdata$SubCountry1[i]="Oregon"
+  if(newdata$SubCountry1[i]=="WA")
+    newdata$SubCountry1[i]="Washington"
+  if(newdata$SubCountry1[i]=="AK")
+    newdata$SubCountry1[i]="Alaska"
+  if(newdata$SubCountry1[i]=="HI")
+    newdata$SubCountry1[i]="Hawaii"
+  if(newdata$SubCountry1[i]=="VA")
+    newdata$SubCountry1[i]="Virginia"
+  if(newdata$SubCountry1[i]=="TX")
+    newdata$SubCountry1[i]="Texas"
+  if(newdata$SubCountry1[i]=="Or")
+    newdata$SubCountry1[i]="Oregon"
+  if(newdata$SubCountry1[i]=="NJ")
+    newdata$SubCountry1[i]="New Jersey"
+  if(newdata$SubCountry1[i]=="Hi")
+    newdata$SubCountry1[i]="Hawaii"
+  if(newdata$SubCountry1[i]=="FL")
+    newdata$SubCountry1[i]="Florida"
+  if(newdata$SubCountry1[i]=="BC")
+    newdata$SubCountry1[i]="British Columbia"
+  if(newdata$SubCountry1[i]=="MA")
+    newdata$SubCountry1[i]="Manabí"
+  if(newdata$SubCountry1[i]=="Ng")
+    newdata$SubCountry1[i]="Ngerkeklau"
+  if(newdata$SubCountry1[i]=="AL")
+    newdata$SubCountry1[i]="Alabama"
+  if(newdata$SubCountry1[i]=="MS")
+    newdata$SubCountry1[i]="Mississippi"
+  if(newdata$SubCountry1[i]=="LA")
+    newdata$SubCountry1[i]="Louisiana"
+  if(newdata$SubCountry1[i]=="Ha")
+    newdata$SubCountry1[i]="Hawaii"
+  if(newdata$SubCountry1[i]=="Ya")
+    newdata$SubCountry1[i]="Yap"
+  if(newdata$SubCountry1[i]=="NA")
+    newdata$SubCountry1[i]="Neiafu"
+  if(newdata$SubCountry1[i]=="ME")
+    newdata$SubCountry1[i]="Maine"
+  if(newdata$SubCountry1[i]=="Al")
+    newdata$SubCountry1[i]="Maine"
+  if(newdata$SubCountry1[i]=="JA")
+    newdata$SubCountry1[i]="Jalisco"
+  if(newdata$SubCountry1[i]=="NC")
+    newdata$SubCountry1[i]="North Carolina"
+  if(newdata$SubCountry1[i]=="WAL")
+    newdata$SubCountry1[i]="Wallonia"
+}
 
 #####SUBSECTION: ANALISI AREA (Michael)
 
 #sum(newdata$Length==0) 3328 con lunghezza 0
 #capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 3328 righe o invece eliminare 
 #la colonna Length
+
 
 
 ###########
