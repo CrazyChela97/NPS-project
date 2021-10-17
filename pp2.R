@@ -214,10 +214,15 @@ for (i in 1:length(newdata$Location)) {
       newdata$CountryName_FromSource[i]="United Arab Emirates"
 }
 
+nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
+nrow(newdata[na.omit(newdata$Location),]) #48001
+#finalmente abbiamo un dataset senza NA nè nella colonna Location nè nella colonna CountryName_FromSource
+
 #alcuni SubCountry_L1 sono a sigla altri nome intero tipo CA=California, bisogna con pazienza 
 #metterli uguali per poter magari fare degli aggregate o confrontare stessi SubCountry
 #a prima occhiata sembrano solo i primi 2121 da aggiustare che sono con la sigla mentre tutti gli
 #altri hanno il nome completo
+
 
 
 #####SUBSECTION: ANALISI AREA (Michael)
