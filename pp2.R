@@ -293,12 +293,12 @@ for (i in 1:length(newdata$Location)) {
 
 ###########
 #SECTION GRAFICI (MICHI, Michael(outlier))
-dati_2015 = data[which(data$Year=="2015"), ]
-stati = aggregate(dati_2015$Totalltems_EventRecord, by=list(Country=dati_2015$CountryName_FromSource, month=dati_2015$MonthNum), FUN=sum)
-nomi_stati = levels(factor(dati_2015$CountryName_FromSource))
+dati_2015 = newdata[which(newdata$Year=="2015"), ]
+stati = aggregate(dati_2015$TotalItems, by=list(Country=dati_2015$Country, month=dati_2015$MonthNum), FUN=sum)
+nomi_stati = levels(factor(dati_2015$Country))
 zeros = rep(0, length(nomi_stati))
 stati_fda = data.frame(nomi_stati)
-#length(nomi_stati) 2015=43, 2016=117, 2017=120, 2018=138
+#length(nomi_stati) 2015=20, 2016=93, 2017=103, 2018=113
 #da capire se tenere anche il 2015 o considerare solo gli ultimi tre anni dove abbiamo 
 #più o meno lo stesso numero di stati
 
@@ -322,8 +322,8 @@ title('Country/Month 2015')
 
 
 #### provo su tutto dataset
-stati = aggregate(data$Totalltems_EventRecord, by=list(Country=data$CountryName_FromSource, month=data$MonthNum, year=data$Year), FUN=sum)
-nomi_stati = levels(factor(data$CountryName_FromSource)) #cosa sono gli stati "25000,42000,43000 e 92000"?
+stati = aggregate(newdata$TotalItems, by=list(Country=newdata$Country, month=newdata$MonthNum, year=newdata$Year), FUN=sum)
+nomi_stati = levels(factor(newdata$Country)) 
 zeros = rep(0, length(nomi_stati))
 stati_fda = data.frame(nomi_stati)
 
@@ -352,26 +352,26 @@ title('Country/Month 2015-2018')
 # palese outlier nel 2018, va trovato
 stati[which(stati$x==max(stati$x)),1] #outlier Ghana
 
-Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #61 riga del Ghana
+Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #38 riga del Ghana
 sum(Ghana==0) #42 su 48, solo 6 valori in 4 anni e uno di questi è il più alto tra tutti i paesi
-matplot(t(stati_fda[-61 ,-1]), type='l')
+matplot(t(stati_fda[-38 ,-1]), type='l')
 title('Country/Month 2015-2018')
 
 #nuovo dataset senza Ghana
 stati_new=stati[-which(stati$Country=='Ghana'),]
 stati_new[which(stati_new$x==max(stati_new$x)),1]
 
-Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #119 riga delle Philippines
+Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #88 riga delle Philippines
 sum(Philippines==0) #22 su 48, 26 valori da metà del secondo anno in poi
-matplot(t(stati_fda[-c(61,119) ,-1]), type='l')
+matplot(t(stati_fda[-c(38,88) ,-1]), type='l')
 title('Country/Month 2015-2018')
 
 stati_new1=stati_new[-which(stati_new$Country=='Philippines'),]
 stati_new1[which(stati_new1$x==max(stati_new1$x)),1]
 
-USA=stati_fda[which(stati_fda$Country=='USA'),] #164 riga degli USA
+USA=stati_fda[which(stati_fda$Country=='USA'),] #125 riga degli USA
 sum(USA==0) #0 ci sono tutti i valori dei 48 mesi
-matplot(t(stati_fda[-c(61,119,164) ,-1]), type='l')
+matplot(t(stati_fda[-c(38,88,125) ,-1]), type='l')
 title('Country/Month 2015-2018')
 
 #plotto andamento USA
