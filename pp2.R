@@ -10,6 +10,8 @@ View(data)
 
 ######
 #SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
+
+###SUBSECTION: pulizia kontatti!!11!!
 ##TODO: ricordarsi di cambiare i nomi delle colonne di sto dataset perchè fanno vomitare
 ##TODO: scatterplot cose raccolte vs num di volontari
 
@@ -26,13 +28,8 @@ View(newdata)
 
 #CAMI: per ora metto in commentato l'area, mi concentro su nome stato, data e q.tà raccolta
 #per fortuna non ho NAN in TotalItems_EventRecord
-#
 
-#newdata <- newdata[!is.na(newdata$TotalWidth_m),] #-49894 dati!! contiene solo 2121 dati
-#significa che 49894 righe non hanno il dato larghezza e quindi non possiamo calcolare 
-#la superificie quindi rende le tre colonne larghezza, lunghezza e superficie inutili, 
-#questo secondo me è un problema perchè avremmo potuto fare delle analisi tipo volontari vs area
-#o quantità di plastica vs area 
+
 levels(factor(newdata$CountryName_FromSource))
 
 #CAMI: queste etichette andavano cambiate per omonimia o cose no sense(tipo oslo municipality)
@@ -76,10 +73,34 @@ newdata[which(newdata$CountryName_FromSource == 'Micronesia, Federated States of
 newdata[which(newdata$CountryName_FromSource == 'Western Greece and the Ionian'), ]$CountryName_FromSource = 'Greece'
 newdata[which(newdata$CountryName_FromSource == 'USVI'), ]$CountryName_FromSource = 'UK'
 newdata[which(newdata$CountryName_FromSource == 'Saint Lucia'), ]$CountryName_FromSource = 'USA'
+newdata[which(newdata$CountryName_FromSource == 'Federal Territory of Kuala Lumpur'), ]$CountryName_FromSource = 'Malaysia'
 
 
 levels(factor(newdata$CountryName_FromSource))
 
+##ATTENZIONE!!! OBJECTID >> NUMERO COLONNE!!!
+newdata[which(newdata$CountryName_FromSource=='25000'),]$OBJECTID
+newdata=newdata[!(newdata$CountryName_FromSource=='42000'),]
+newdata=newdata[!(newdata$CountryName_FromSource=='43000'),]
+newdata=newdata[!(newdata$CountryName_FromSource=='92000'),]
+newdata=newdata[!(newdata$CountryName_FromSource=='ASCN 1ZZ'),]
+newdata=newdata[!(newdata$CountryName_FromSource=='STHL 1ZZ'),]
+
+
+
+
+
+
+
+
+
+
+#####SUBSECTION: ANALISI AREA (Michael)
+newdata <- newdata[!is.na(newdata$TotalWidth_m),] #-49894 dati!! contiene solo 2121 dati
+#significa che 49894 righe non hanno il dato larghezza e quindi non possiamo calcolare 
+#la superificie quindi rende le tre colonne larghezza, lunghezza e superficie inutili, 
+#questo secondo me è un problema perchè avremmo potuto fare delle analisi tipo volontari vs area
+#o quantità di plastica vs area 
 
 
 #calcolo superficie totale, TotalArea_Sq_m sono tutti NA, pu? essere utile
