@@ -7,11 +7,35 @@ library(stringr)
 setwd("C:/Users/rozzu/OneDrive/Desktop/NPS-project")
 PP_2 <- read_csv("PP_2.csv")
 
+#SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
+
+###SUBSECTION: pulizia kontatti!!11!!
+##TODO: ricordarsi di cambiare i nomi delle colonne di sto dataset perch� fanno vomitare
+##TODO: scatterplot cose raccolte vs num di volontari
+
+
 data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:83)]
-# impongo unica classe USA anche per United States, va fatto per tutti i doppioni
-data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
-data[which(data$CountryName_FromSource == 'Italy'), ]$CountryName_FromSource = 'IT'
-#CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
+
+#cosa stranissima, ad Hong Kong c'è il massimo del numero di volontari 188463
+#ma con solo 1 oggetto raccolto, non è abbastanza strano?
+#inoltre ci sono un sacco di NA anche in TotalWidth quindi non abbiamo tutte le aree
+#e tanti NA anche in CountryName_FromSource quindi nell'aggregate sotto della Michi non ci sono
+#tutti i raggrupamenti
+
+#abbiamo due latitudini e due longitudini che sono praticamente uguali perchè una corrisponde
+#alla zona e l'altra allo stato, possiamo decidere di tenere sono lo stato secondo me in modo 
+#da poter fare un'analisi più "interna", tipo negli USA, analizzando i SubCountry
+
+#"Day" non so quanto sia utile dato che rappresenta il giorno del mese ma non ci sono tutti
+#per nessun mese e nessun stato, anzi alcuni giorni sono uguali e corrispondono a diverse zone
+#secondo me possiamo eliminarlo 
+
+#data$TotalClassifiedItems_EC2020 non ho capito cosa rappresenta
+#CAMI(feat MICHI): rappresenta come alcuni rifiuti sono stati catalogati, per ora non è utile
+#ma ce lo teniamo buono
+
+#"Organization" ci serve? ci sono un sacco di NA che non possiamo recuperare
+
 
 #CAMI: sposto questa parte qua così pulisco prima i NAN
 sum(is.na(data$TotalVolunteers))
@@ -26,6 +50,10 @@ View(newdata)
 levels(factor(newdata$CountryName_FromSource))
 
 #CAMI: queste etichette andavano cambiate per omonimia o cose no sense(tipo oslo municipality)
+#impongo unica classe USA anche per United States, va fatto per tutti i doppioni
+data[which(data$CountryName_FromSource == 'United States'), ]$CountryName_FromSource = 'USA'
+data[which(data$CountryName_FromSource == 'Italy'), ]$CountryName_FromSource = 'IT'
+#CAMI: ci sono un sacco di etichette strane per gli stati, vediamo come fare
 newdata[which(newdata$CountryName_FromSource == 'BA'), ]$CountryName_FromSource = 'Bosnia Erzegovina'
 newdata[which(newdata$CountryName_FromSource == 'BE'), ]$CountryName_FromSource = 'Belgium'
 newdata[which(newdata$CountryName_FromSource == 'BG'), ]$CountryName_FromSource = 'Bulgaria'
@@ -205,26 +233,6 @@ for (i in 1:length(newdata$Location)) {
 for (i in 1:length(data$OBJECTID)) {
   data$TotalArea_Sq_m[i]=data$TotalWidth_m[i]*data$TotalLength_m[i]
 }
-
-#cosa stranissima, ad Hong Kong c'è il massimo del numero di volontari 188463
-#ma con solo 1 oggetto raccolto, non è abbastanza strano?
-#inoltre ci sono un sacco di NA anche in TotalWidth quindi non abbiamo tutte le aree
-#e tanti NA anche in CountryName_FromSource quindi nell'aggregate sotto della Michi non ci sono
-#tutti i raggrupamenti
-
-#abbiamo due latitudini e due longitudini che sono praticamente uguali perchè una corrisponde
-#alla zona e l'altra allo stato, possiamo decidere di tenere sono lo stato secondo me in modo 
-#da poter fare un'analisi più "interna", tipo negli USA, analizzando i SubCountry
-
-#"Day" non so quanto sia utile dato che rappresenta il giorno del mese ma non ci sono tutti
-#per nessun mese e nessun stato, anzi alcuni giorni sono uguali e corrispondono a diverse zone
-#secondo me possiamo eliminarlo 
-
-#data$TotalClassifiedItems_EC2020 non ho capito cosa rappresenta
-#CAMI(feat MICHI): rappresenta come alcuni rifiuti sono stati catalogati, per ora non è utile
-#ma ce lo teniamo buono
-
-#"Organization" ci serve? ci sono un sacco di NA che non possiamo recuperare
 
 
 ###########
