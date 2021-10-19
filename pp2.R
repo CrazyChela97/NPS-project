@@ -171,7 +171,7 @@ length(location$zona) #ora 3603 location (prima 3337), i 5520 NA di prima hanno 
 #codice sotto: ho aggiunto con la pazienza di Dio a chi aveva solo una "parola" in Location
 #e nulla in CountryName_FromSource il corrispettivo CountryName_FromSource
 for (i in 1:length(newdata$Location)) {
-  if((length(unlist(strsplit(newdata$Location[i], ", ")))==1)&(is.na(newdata$CountryName_FromSource[i])==TRUE))
+  if((length(unlist(strsplit(newdata$Location[i], ", ")))==1)&(is.na(newdata$CountryName_FromSource[i])==TRUE)) #questa riga è inutile, l'ho usata per identificare quali erano quelli con location con stringa singola e Country NA
     if(newdata$Location[i]=="Singapore")
       newdata$CountryName_FromSource[i]="Singapore"
     if(newdata$Location[i]=="Hong Kong")
