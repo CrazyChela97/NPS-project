@@ -1,5 +1,6 @@
 ####GRAPHIC ANALYSIS
 setwd("~/Documents/GitHub/NPS-project")
+library(rio)
 
 load("~/Documents/GitHub/NPS-project/cleandata.Rdata")
 cleandata=import("cleandata.Rdata")
