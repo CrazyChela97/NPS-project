@@ -107,15 +107,6 @@ newdata=newdata[!(newdata$CountryName_FromSource=='92000'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='ASCN 1ZZ'),]
 newdata=newdata[!(newdata$CountryName_FromSource=='STHL 1ZZ'),]
 
-##SEMBRA OKAY ORA
-#facciamo qualche analisi: prima cosa faccio uno scatterplot
-#num volontari vs qtà plastica raccolta
-
-plot(newdata$TotalVolunteers,newdata$Totalltems_EventRecord) #palesi outlier da indagare bene
-#tipo cosa stranissima, ad Hong Kong c'Ã¨ il massimo del numero di volontari 188463
-#ma con solo 1 oggetto raccolto, non Ã¨ abbastanza strano?
-
-
 #Michael
 
 location=aggregate(newdata$Location, by=list(zona=newdata$Location), FUN=length)
@@ -224,8 +215,8 @@ nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
 nrow(newdata[na.omit(newdata$Location),]) #48001
 #finalmente abbiamo un dataset senza NA nè nella colonna Location nè nella colonna CountryName_FromSource
 
-newdata=newdata[,-c(1,3,11,13)]
-colnames(newdata)[c(2,3,4,9,17,19,20)] <- c("Country","SubCountry1","SubCountry2","Length","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal")
+newdata=newdata[,-c(1,3,9,10,11,13)]
+colnames(newdata)[c(2,3,4,7,15,17,18)] <- c("Country","SubCountry1","SubCountry2","Length","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal")
 
 
 #alcuni SubCountry_L1 sono a sigla altri nome intero tipo CA=California, bisogna con pazienza 
@@ -292,109 +283,28 @@ for (i in 1:length(newdata$Location)) {
     newdata$SubCountry1[i]="Wallonia"
 }
 
+#anomalia: alcune spedizioni hanno zero item raccolti, ovviamente le elimino
+#idem per zero persone e item diversi da zero
+newdata=newdata[which(newdata$TotalVolunteers != 0),] #-60
+newdata=newdata[which(newdata$TotalItems != 0),] #-2201
+
+table(as.factor(newdata$Country))
+
+#righe ripetute 
+newdata=newdata[!duplicated(newdata), ]#-4312
+newdata=newdata[!duplicated(newdata[,c(1,2,3,4,8,9,10,11,12,13,14,15)]),] 
 
 ##PARENTESI COSI' SI SALVANO LE COSE
 #save(newdata,file="cleandata.Rdata")
 ##COSI' SI RIAPRONO
 #library(rio)
-#dati=import("cleandata.Rdata")
+#cleandata=import("cleandata.Rdata")
 
 #####SUBSECTION: ANALISI AREA (Michael)
 
-#sum(newdata$Length==0) 3328 con lunghezza 0
-#capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 3328 righe o invece eliminare 
+#sum(newdata$Length==0) 2598 con lunghezza 0
+#capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 2598 righe o invece eliminare 
 #la colonna Length
 
 
-
-###########
-#SECTION GRAFICI (MICHI, Michael(outlier))
-dati_2015 = newdata[which(newdata$Year=="2015"), ]
-stati = aggregate(dati_2015$TotalItems, by=list(Country=dati_2015$Country, month=dati_2015$MonthNum), FUN=sum)
-nomi_stati = levels(factor(dati_2015$Country))
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
-#length(nomi_stati) 2015=20, 2016=93, 2017=103, 2018=113
-#da capire se tenere anche il 2015 o considerare solo gli ultimi tre anni dove abbiamo 
-#più o meno lo stesso numero di stati
-
-#dataframe stati/mesi
-for (i in 1:12){
-  stati_fda = cbind(stati_fda, zeros);
-  temp = stati[which(stati$month==i), ]
-  index = match(temp$Country, stati_fda$nomi_stati)
-  stati_fda[index, i+1] = temp$x
-}
-names(stati_fda) =  as.character(c('Country', 1:12))
-
-# plot functional data
-matplot(t(stati_fda[ ,-1]), type='l')
-title('Country/Month 2015')
-# con pacchetto roahd
-data_fun = fData(1:12, stati_fda[ ,-1])
-plot(data_fun)
-title('Country/Month 2015')
-# molto fikoh
-
-
-#### provo su tutto dataset
-stati = aggregate(newdata$TotalItems, by=list(Country=newdata$Country, month=newdata$MonthNum, year=newdata$Year), FUN=sum)
-nomi_stati = levels(factor(newdata$Country)) 
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
-
-#dataframe stati/mesi
-count = 1
-
-for (y in 2015:2018){
-  for (i in 1:12){
-    stati_fda = cbind(stati_fda, zeros);
-    temp = stati[which(stati$month==i & stati$year==y), ]
-    index = match(temp$Country, stati_fda$nomi_stati)
-    stati_fda[index, count+1] = temp$x
-    count = count+1
-  }
-}
-names(stati_fda) =  as.character(c('Country', 1:(12*4)))
-
-# plot functional data
-matplot(t(stati_fda[ ,-1]), type='l')
-title('Country/Month 2015-2018')
-# con pacchetto roahd
-data_fun = fData(1:(12*4), stati_fda[ ,-1])
-plot(data_fun)
-title('Country/Month 2015-2018')
-
-# palese outlier nel 2018, va trovato
-stati[which(stati$x==max(stati$x)),1] #outlier Ghana
-
-Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #38 riga del Ghana
-sum(Ghana==0) #42 su 48, solo 6 valori in 4 anni e uno di questi è il più alto tra tutti i paesi
-matplot(t(stati_fda[-38 ,-1]), type='l')
-title('Country/Month 2015-2018')
-
-#nuovo dataset senza Ghana
-stati_new=stati[-which(stati$Country=='Ghana'),]
-stati_new[which(stati_new$x==max(stati_new$x)),1]
-
-Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #88 riga delle Philippines
-sum(Philippines==0) #22 su 48, 26 valori da metà del secondo anno in poi
-matplot(t(stati_fda[-c(38,88) ,-1]), type='l')
-title('Country/Month 2015-2018')
-
-stati_new1=stati_new[-which(stati_new$Country=='Philippines'),]
-stati_new1[which(stati_new1$x==max(stati_new1$x)),1]
-
-USA=stati_fda[which(stati_fda$Country=='USA'),] #125 riga degli USA
-sum(USA==0) #0 ci sono tutti i valori dei 48 mesi
-matplot(t(stati_fda[-c(38,88,125) ,-1]), type='l')
-title('Country/Month 2015-2018')
-
-#plotto andamento USA
-#USA magari caso particolare essendo davvero grande, magari utile analizzare i SubCountry
-USA = stati_fda[which(stati_fda$Country=='USA'), ]
-data_fun = fData(1:(12*4), USA[ ,-1])
-plot(data_fun)
-title('USA Monthly collected plastic')
-# picchi raccolta a settembre/ottobre di ogni anno
 
