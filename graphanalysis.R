@@ -1,26 +1,27 @@
 ####GRAPHIC ANALYSIS
 setwd("~/Documents/GitHub/NPS-project")
-library(rio)
-library(roahd)
 
 load("~/Documents/GitHub/NPS-project/cleandata.Rdata")
-cleandata=import("cleandata.Rdata")
 View(cleandata)
 
 
 ##1)prima cosa faccio uno scatterplot
-#num volontari vs quantit‡ plastica raccolta
+#num volontari vs qt√† plastica raccolta
 quartz()
-plot(cleandata$TotalVolunteers,cleandata$TotalItems)
+plot(cleandata$TotalVolunteers,cleandata$Totalltems_EventRecord)
 
 sort(cleandata$TotalVolunteers, decreasing = TRUE)
-sort(cleandata$TotalItems, decreasing = TRUE)
+sort(cleandata$Totalltems_EventRecord, decreasing = TRUE)
 
 noout=cleandata[which(cleandata$TotalVolunteers < 5000),]
-noout=noout[which(noout$TotalItems < 100000),]
+noout=noout[which(noout$Totalltems_EventRecord < 100000),]
 
+#anomalia: alcune spedizioni hanno zero item raccolti, ovviamente le elimino
+#idem per zero persone e item diversi da zero
+noout=noout[which(noout$Totalltems_EventRecord != 0),]
+noout=noout[which(noout$TotalVolunteers != 0),]
 
-plot(noout$TotalVolunteers,noout$TotalItems, main="Human resouches VS Items collected",
+plot(noout$TotalVolunteers,(noout$Totalltems_EventRecord), main="Human resouches VS Items collected",
      xlab="Num of total volunteers", ylab="Items recorded")
 #metto un logaritmo solo nella quantit√† di plastica raccolta
 #non lo metto anche per i volontari perch√® mi sembra concettualmente sbagliato (num volontari √® intero)
@@ -28,87 +29,71 @@ plot(noout$TotalVolunteers,noout$TotalItems, main="Human resouches VS Items coll
 
 ##altrimenti
 zoom=noout[which(noout$TotalVolunteers < 500),]
-zoom=zoom[which(zoom$TotalItems < 10000),]
-plot(zoom$TotalVolunteers,zoom$TotalItems, main="Human resouches VS Items collected",
+zoom=zoom[which(zoom$Totalltems_EventRecord < 10000),]
+plot(zoom$TotalVolunteers,(zoom$Totalltems_EventRecord), main="Human resouches VS Items collected",
      xlab="Num of total volunteers", ylab="Items recorded")
 #meglio ancora!
 
+##depth mearures!!
+#prendo un dato bivariato
 
-###########
-#SECTION GRAFICI (MICHI, Michael(outlier))
-dati_2018 = cleandata[which(cleandata$Year=="2018"), ]
-stati = aggregate(dati_2018$TotalItems, by=list(Country=dati_2018$Country, month=dati_2018$MonthNum), FUN=sum)
-nomi_stati = levels(factor(dati_2018$Country))
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
+bivariate = noout[,c(15,21)]
+biv.zoom=zoom[,c(15,21)]
+bivariate = as.matrix(bivariate) #levels = 99
+biv.zoom=as.matrix(biv.zoom) #levels = 49
+bivariate.sd = scale(bivariate)
 
-#length(nomi_stati) 2015=20, 2016=93, 2017=100, 2018=109
-#consideriamo solo gli ultimi tre anni dove abbiamo pi˘ o meno lo stesso numero di stati
-cleandata=cleandata[which(cleandata$Year!="2015"),] #dataset finale 39272 osservazioni, 2015 ha solo 1394 osservazioni
-dim(cleandata[which(cleandata$Year=="2016"),])[1] #9288 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2017"),])[1] #12378 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2018"),])[1] #17606 osservazioni nel 2016
+#riga 116 fino a 171
 
-#new dataset
-stati = aggregate(cleandata$TotalItems, by=list(Country=cleandata$Country, month=cleandata$MonthNum, year=cleandata$Year), FUN=sum)
-nomi_stati = levels(factor(cleandata$Country)) 
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
+#l'ideale sarebbe rifare tutto con noout
+#forse user√≤ zoom
+depthContour(
+  bivariate,
+  depth_params = list(method = 'Tukey'),
+  points = FALSE,
+  colors = colorRampPalette(c('white', 'navy')),
+  levels = 99,
+  pdmedian = F,
+  graph_params = list(cex=0.01, pch=1),
+  pmean = F
+)
 
-#dataframe stati/mesi
-count = 1
+bagplot(bivariate)
 
-for (y in 2016:2018){
-  for (i in 1:12){
-    stati_fda = cbind(stati_fda, zeros);
-    temp = stati[which(stati$month==i & stati$year==y), ]
-    index = match(temp$Country, stati_fda$nomi_stati)
-    stati_fda[index, count+1] = temp$x
-    count = count+1
-  }
-}
-names(stati_fda) =  as.character(c('Country', 1:(12*3)))
+#linguaggio ispirato a SQL per selezionare gli outliers
+aplpack::bagplot(bivariate,show.whiskers = F,main="Bagplot")
+aplpack::bagplot(bivariate,show.loophull = F,main="Sunburst plot")
 
-# plot functional data
-matplot(t(stati_fda[ ,-1]), type='l')
-title('Country/Month 2016-2018')
-# con pacchetto roahd
-data_fun = fData(1:(12*3), stati_fda[ ,-1])
-plot(data_fun)
-title('Country/Month 2016-2018')
+bagplot_biv<- bagplot(bivariate)
+outlying_obs <- bagplot_biv$pxy.outlier
+outlying_obs
+#mi dice lui come raffinare ancora noout
 
-# palese outlier nel 2018, va trovato
-stati[which(stati$x==max(stati$x)),1] #outlier Ghana
+outlying_obs=as.matrix(outlying_obs)
 
-Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #38 riga del Ghana
-sum(Ghana==0) #30 su 36, solo 6 valori in 3 anni e uno di questi Ë il pi˘ alto tra tutti i paesi
-matplot(t(stati_fda[-38 ,-1]), type='l')
-title('Country/Month 2016-2018')
+ind_outlying_obs <- which(apply(bivariate,1,function(x) all(x %in% outlying_obs)))
+raffinato <- bivariate[-ind_outlying_obs,]
 
-#nuovo dataset senza Ghana
-stati_new=stati[-which(stati$Country=='Ghana'),]
-stati_new[which(stati_new$x==max(stati_new$x)),1]
+raffinato=as.matrix(raffinato)
+depthContour(
+  raffinato,
+  depth_params = list(method = 'Tukey'),
+  points = FALSE,
+  colors = colorRampPalette(c('white', 'navy')),
+  levels = 99,
+  pdmedian = F,
+  graph_params = list(cex=0.01, pch=1),
+  pmean = F
+)
 
-Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #86 riga delle Philippines
-sum(Philippines==0) #10 su 36, 26 valori da met‡ del secondo anno in poi
-matplot(t(stati_fda[-c(38,86) ,-1]), type='l')
-title('Country/Month 2016-2018')
+plot(raffinato)
+#molto meglio di zoom!!
 
-stati_new1=stati_new[-which(stati_new$Country=='Philippines'),]
-stati_new1[which(stati_new1$x==max(stati_new1$x)),1]
 
-USA=stati_fda[which(stati_fda$Country=='USA'),] #123 riga degli USA
-sum(USA==0) #0 ci sono tutti i valori dei 36 mesi
-matplot(t(stati_fda[-c(38,86,123) ,-1]), type='l') #stupendo 
-title('Country/Month 2016-2018')
 
-#plotto andamento USA
-#USA magari caso particolare essendo davvero grande, il pi˘ grande, magari Ë utile analizzare i SubCountry
-USA = stati_fda[which(stati_fda$Country=='USA'), ]
-data_fun = fData(1:(12*3), USA[ ,-1])
-plot(data_fun)
-title('USA Monthly collected plastic')
-# picchi raccolta a settembre/ottobre di ogni anno
+
+
+
 
 
 
