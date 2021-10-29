@@ -14,8 +14,8 @@ PP_2 <- read_csv("PP_2.csv")
 ##TODO: scatterplot cose raccolte vs num di volontari
 
 
-data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:83)]
-
+data = PP_2[ , -c(1,2,4,5,6,7,9,11,22,23,24,25,28,29,30,35,37,38,43:73,75,76,78:83)]
+data=data[,-c(11,12,13)]
 #cosa stranissima, ad Hong Kong c'Ã¨ il massimo del numero di volontari 188463
 #ma con solo 1 oggetto raccolto, non Ã¨ abbastanza strano?
 
@@ -215,8 +215,8 @@ nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
 nrow(newdata[na.omit(newdata$Location),]) #48001
 #finalmente abbiamo un dataset senza NA nè nella colonna Location nè nella colonna CountryName_FromSource
 
-newdata=newdata[,-c(1,3,9,10,11,13)]
-colnames(newdata)[c(2,3,4,7,15,17,18)] <- c("Country","SubCountry1","SubCountry2","Length","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal")
+newdata=newdata[,-c(1,3,9,10)]
+colnames(newdata)[c(2,3,4,14,16,17,18,19)] <- c("Country","SubCountry1","SubCountry2","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal","Continent","Area")
 
 
 #alcuni SubCountry_L1 sono a sigla altri nome intero tipo CA=California, bisogna con pazienza 
@@ -291,8 +291,8 @@ newdata=newdata[which(newdata$TotalItems != 0),] #-2201
 table(as.factor(newdata$Country))
 
 #righe ripetute 
-newdata=newdata[!duplicated(newdata), ]#-4312
-newdata=newdata[!duplicated(newdata[,c(1,2,3,4,8,9,10,11,12,13,14,15)]),] 
+newdata=newdata[!duplicated(newdata), ]#-4319
+newdata=newdata[!duplicated(newdata[,c(1,2,3,4,7,9,10,11,12,13,14,15,16,17)]),] 
 
 ##PARENTESI COSI' SI SALVANO LE COSE
 #save(newdata,file="cleandata.Rdata")
@@ -300,11 +300,6 @@ newdata=newdata[!duplicated(newdata[,c(1,2,3,4,8,9,10,11,12,13,14,15)]),]
 #library(rio)
 #cleandata=import("cleandata.Rdata")
 
-#####SUBSECTION: ANALISI AREA (Michael)
-
-#sum(newdata$Length==0) 2598 con lunghezza 0
-#capire se possiamo fare qualcosa con la lunghezza e quindi eliminare queste 2598 righe o invece eliminare 
-#la colonna Length
 
 
 
