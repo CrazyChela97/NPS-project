@@ -4,7 +4,8 @@ library(roahd)
 library(dplyr)
 library(stringr)
 
-setwd("C:/Users/rozzu/OneDrive/Desktop/NPS-project")
+current_path=rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
 PP_2 <- read_csv("PP_2.csv")
 
 #SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
