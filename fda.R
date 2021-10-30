@@ -1,4 +1,3 @@
-####GRAPHIC ANALYSIS
 setwd("~/Documents/GitHub/NPS-project")
 library(rio)
 library(roahd)
@@ -21,102 +20,12 @@ dim(cleandata[which(cleandata$Year=="2016"),])[1] #9273 osservazioni nel 2016
 dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
 dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
 
-##1)prima cosa faccio uno scatterplot
-#num volontari vs quantità plastica raccolta
-quartz()
-plot(cleandata$TotalVolunteers,cleandata$TotalItems)
-
-bin=hexbin(cleandata$TotalVolunteers,cleandata$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
-
-u=cleandata[,c(8,14)]
-tukey_depth=depth(u,method='Tukey')
-depthMedian(u,depth_params = list(method='Tukey'))
-u[which.max(tukey_depth),]
-depthContour(u,depth_params = list(method='Tukey'))
-
-depthPersp(u,depth_params = list(method='Tukey'))
-
-depthPersp(u,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(u,method='Mahalanobis') 
-
-depthMedian(u,depth_params = list(method='Mahalanobis'))
-
-depthContour(u,depth_params = list(method='Mahalanobis'))
-
-depthPersp(u,depth_params = list(method='Mahalanobis'))
-
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
-
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
-
-tukey_depth=depth(clean,method='Tukey')
-depthMedian(clean,depth_params = list(method='Tukey'))
-clean[which.max(tukey_depth),]
-depthContour(clean,depth_params = list(method='Tukey'))
-
-depthPersp(clean,depth_params = list(method='Tukey'))
-
-depthPersp(clean,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(clean,method='Mahalanobis') 
-
-depthMedian(clean,depth_params = list(method='Mahalanobis'))
-
-depthContour(clean,depth_params = list(method='Mahalanobis'))
-
-depthPersp(clean,depth_params = list(method='Mahalanobis'))
-
-bagplot(clean)
-plot(clean$TotalVolunteers,clean$TotalItems)
-
-bin=hexbin(clean$TotalVolunteers,clean$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
-
-
-North_America=cleandata[which(cleandata$Continent=='North America'),] #30108 dati su 38953 totali
-
-u=North_America[,c(8,14)]
-
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
-
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
-
-plot(cleandata$TotalVolunteers,cleandata$Area)
-u=cleandata[,c(8,19)]
-
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
-
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-noutlier <- u[-ind_outlying_obs,]
-
-par(mfrow=c(1,2))
-plot(cleandata$TotalVolunteers,cleandata$Area)
-plot(noutlier$TotalVolunteers,noutlier$Area)
-
-
-
-
-###########
-#FUNCTIONAL DATA
+###FUNCTIONAL DATA
 dati_2018 = cleandata[which(cleandata$Year=="2018"), ]
 stati = aggregate(dati_2018$TotalItems, by=list(Country=dati_2018$Country, month=dati_2018$MonthNum), FUN=sum)
 nomi_stati = levels(factor(dati_2018$Country))
 zeros = rep(0, length(nomi_stati))
 stati_fda = data.frame(nomi_stati)
-
-#length(nomi_stati) 2015=20, 2016=93, 2017=100, 2018=109
-#consideriamo solo gli ultimi tre anni dove abbiamo più o meno lo stesso numero di stati
-cleandata=cleandata[which(cleandata$Year!="2015"),] #dataset finale 38953 osservazioni, 2015 ha solo  1411 osservazioni
-dim(cleandata[which(cleandata$Year=="2016"),])[1] #9273 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
 
 #new dataset
 stati = aggregate(cleandata$TotalItems, by=list(Country=cleandata$Country, month=cleandata$MonthNum, year=cleandata$Year), FUN=sum)
@@ -206,7 +115,7 @@ title('USA Monthly collected plastic')
 # picchi raccolta a settembre/ottobre di ogni anno
 
 
-North_America=cleandata[which(cleandata$Continent=='North America'),] #North America ha 31482 dati su 40364 totali.
+North_America=cleandata[which(cleandata$Continent=='North America'),] #30108 dati su 38953 totali
 
 subcountry = aggregate(North_America$TotalItems, by=list(SubCountry=North_America$SubCountry1, day=North_America$Day, month=North_America$MonthNum, year=North_America$Year), FUN=sum)
 nomi_subcountry = levels(factor(North_America$SubCountry1)) 
@@ -223,10 +132,10 @@ for (y in 2016:2018){
   for (x in 1:12){
     if(x==1||x==3||x==5||x==3||x==7||x==8||x==10||x==12){
       for (i in 1:31){
-      temp = subcountry[which(subcountry$day==i & subcountry$month==x & subcountry$year==y), ]
-      index = match(temp$SubCountry, subcountry_fda$SubCountry)
-      subcountry_fda[index, count+1] = temp$x
-      count = count+1
+        temp = subcountry[which(subcountry$day==i & subcountry$month==x & subcountry$year==y), ]
+        index = match(temp$SubCountry, subcountry_fda$SubCountry)
+        subcountry_fda[index, count+1] = temp$x
+        count = count+1
       }}
     if(x==2){
       for (i in 1:28){
