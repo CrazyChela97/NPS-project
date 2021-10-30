@@ -1,271 +1,102 @@
 ####GRAPHIC ANALYSIS
 setwd("~/Documents/GitHub/NPS-project")
-library(rio)
-library(roahd)
-library(rgl)
-library(MASS)
-library(rgl)
-library(DepthProc)
-library(hexbin)
-library(packagefinder)
-library(aplpack)
-library(robustbase)
 
-current_path=rstudioapi::getActiveDocumentContext()$path
-setwd(dirname(current_path))
-cleandata=import("cleandata.Rdata")
+load("~/Documents/GitHub/NPS-project/cleandata.Rdata")
 View(cleandata)
 
-cleandata=cleandata[which(cleandata$Year!="2015"),] #dataset finale 38953 osservazioni, 2015 ha solo  1411 osservazioni
-dim(cleandata[which(cleandata$Year=="2016"),])[1] #9273 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
 
 ##1)prima cosa faccio uno scatterplot
-#num volontari vs quantità plastica raccolta
+#num volontari vs qtÃ  plastica raccolta
 quartz()
-plot(cleandata$TotalVolunteers,cleandata$TotalItems)
+plot(cleandata$TotalVolunteers,cleandata$Totalltems_EventRecord)
 
-bin=hexbin(cleandata$TotalVolunteers,cleandata$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
+sort(cleandata$TotalVolunteers, decreasing = TRUE)
+sort(cleandata$Totalltems_EventRecord, decreasing = TRUE)
 
-u=cleandata[,c(8,14)]
-tukey_depth=depth(u,method='Tukey')
-depthMedian(u,depth_params = list(method='Tukey'))
-u[which.max(tukey_depth),]
-depthContour(u,depth_params = list(method='Tukey'))
+noout=cleandata[which(cleandata$TotalVolunteers < 5000),]
+noout=noout[which(noout$Totalltems_EventRecord < 100000),]
 
-depthPersp(u,depth_params = list(method='Tukey'))
+#anomalia: alcune spedizioni hanno zero item raccolti, ovviamente le elimino
+#idem per zero persone e item diversi da zero
+noout=noout[which(noout$Totalltems_EventRecord != 0),]
+noout=noout[which(noout$TotalVolunteers != 0),]
 
-depthPersp(u,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(u,method='Mahalanobis') 
-
-depthMedian(u,depth_params = list(method='Mahalanobis'))
-
-depthContour(u,depth_params = list(method='Mahalanobis'))
-
-depthPersp(u,depth_params = list(method='Mahalanobis'))
-
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
-
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
-
-tukey_depth=depth(clean,method='Tukey')
-depthMedian(clean,depth_params = list(method='Tukey'))
-clean[which.max(tukey_depth),]
-depthContour(clean,depth_params = list(method='Tukey'))
-
-depthPersp(clean,depth_params = list(method='Tukey'))
-
-depthPersp(clean,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(clean,method='Mahalanobis') 
-
-depthMedian(clean,depth_params = list(method='Mahalanobis'))
-
-depthContour(clean,depth_params = list(method='Mahalanobis'))
-
-depthPersp(clean,depth_params = list(method='Mahalanobis'))
-
-bagplot(clean)
-plot(clean$TotalVolunteers,clean$TotalItems)
-
-bin=hexbin(clean$TotalVolunteers,clean$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
+plot(noout$TotalVolunteers,(noout$Totalltems_EventRecord), main="Human resouches VS Items collected",
+     xlab="Num of total volunteers", ylab="Items recorded")
+#metto un logaritmo solo nella quantitÃ  di plastica raccolta
+#non lo metto anche per i volontari perchÃ¨ mi sembra concettualmente sbagliato (num volontari Ã¨ intero)
 
 
-North_America=cleandata[which(cleandata$Continent=='North America'),] #30108 dati su 38953 totali
+##altrimenti
+zoom=noout[which(noout$TotalVolunteers < 500),]
+zoom=zoom[which(zoom$Totalltems_EventRecord < 10000),]
+plot(zoom$TotalVolunteers,(zoom$Totalltems_EventRecord), main="Human resouches VS Items collected",
+     xlab="Num of total volunteers", ylab="Items recorded")
+#meglio ancora!
 
-u=North_America[,c(8,14)]
+##depth mearures!!
+#prendo un dato bivariato
 
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
+bivariate = noout[,c(15,21)]
+biv.zoom=zoom[,c(15,21)]
+bivariate = as.matrix(bivariate) #levels = 99
+biv.zoom=as.matrix(biv.zoom) #levels = 49
+bivariate.sd = scale(bivariate)
 
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
+#riga 116 fino a 171
 
-plot(cleandata$TotalVolunteers,cleandata$Area)
-u=cleandata[,c(8,19)]
+#l'ideale sarebbe rifare tutto con noout
+#forse userÃ² zoom
+depthContour(
+  bivariate,
+  depth_params = list(method = 'Tukey'),
+  points = FALSE,
+  colors = colorRampPalette(c('white', 'navy')),
+  levels = 99,
+  pdmedian = F,
+  graph_params = list(cex=0.01, pch=1),
+  pmean = F
+)
 
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
+bagplot(bivariate)
 
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-noutlier <- u[-ind_outlying_obs,]
+#linguaggio ispirato a SQL per selezionare gli outliers
+aplpack::bagplot(bivariate,show.whiskers = F,main="Bagplot")
+aplpack::bagplot(bivariate,show.loophull = F,main="Sunburst plot")
 
-par(mfrow=c(1,2))
-plot(cleandata$TotalVolunteers,cleandata$Area)
-plot(noutlier$TotalVolunteers,noutlier$Area)
+bagplot_biv<- bagplot(bivariate)
+outlying_obs <- bagplot_biv$pxy.outlier
+outlying_obs
+#mi dice lui come raffinare ancora noout
 
+outlying_obs=as.matrix(outlying_obs)
 
+ind_outlying_obs <- which(apply(bivariate,1,function(x) all(x %in% outlying_obs)))
+raffinato <- bivariate[-ind_outlying_obs,]
 
+raffinato=as.matrix(raffinato)
+depthContour(
+  raffinato,
+  depth_params = list(method = 'Tukey'),
+  points = FALSE,
+  colors = colorRampPalette(c('white', 'navy')),
+  levels = 99,
+  pdmedian = F,
+  graph_params = list(cex=0.01, pch=1),
+  pmean = F
+)
 
-###########
-#FUNCTIONAL DATA
-dati_2018 = cleandata[which(cleandata$Year=="2018"), ]
-stati = aggregate(dati_2018$TotalItems, by=list(Country=dati_2018$Country, month=dati_2018$MonthNum), FUN=sum)
-nomi_stati = levels(factor(dati_2018$Country))
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
-
-#length(nomi_stati) 2015=20, 2016=93, 2017=100, 2018=109
-#consideriamo solo gli ultimi tre anni dove abbiamo più o meno lo stesso numero di stati
-cleandata=cleandata[which(cleandata$Year!="2015"),] #dataset finale 38953 osservazioni, 2015 ha solo  1411 osservazioni
-dim(cleandata[which(cleandata$Year=="2016"),])[1] #9273 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
-dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
-
-#new dataset
-stati = aggregate(cleandata$TotalItems, by=list(Country=cleandata$Country, month=cleandata$MonthNum, year=cleandata$Year), FUN=sum)
-nomi_stati = levels(factor(cleandata$Country)) 
-zeros = rep(0, length(nomi_stati))
-stati_fda = data.frame(nomi_stati)
-
-#dataframe stati/mesi
-count = 1
-
-for (y in 2016:2018){
-  for (i in 1:12){
-    stati_fda = cbind(stati_fda, zeros);
-    temp = stati[which(stati$month==i & stati$year==y), ]
-    index = match(temp$Country, stati_fda$nomi_stati)
-    stati_fda[index, count+1] = temp$x
-    count = count+1
-  }
-}
-names(stati_fda) =  as.character(c('Country', 1:(12*3)))
-
-
-for (i in 1:127) {
-  x=0;
-  for (t in 1:36) {
-    if(stati_fda[i,1+t]!=0)
-      x=x+1;
-  }
-  if(x>=24)
-    zeros[i]=1
-}
-sum(zeros) #11 stati su 127 che hanno ALMENO 24 mesi su 36 (2 anni su 3) di dati
-#troppi stati hanno troppi mesi = 0 
-
-# plot functional data
-matplot(t(stati_fda[ ,-1]), type='l')
-title('Country/Month 2016-2018')
-# con pacchetto roahd
-data_fun_stati = fData(1:(12*3), stati_fda[ ,-1])
-plot(data_fun_stati)
-title('Country/Month 2016-2018')
-
-outliers_stati=outliergram(data_fun_stati, display = FALSE)
-outliers_stati$ID_outliers #nessun outlier??
-
-# palese outlier nel 2018, va trovato
-stati[which(stati$x==max(stati$x)),1] #outlier Ghana
-
-Ghana=stati_fda[which(stati_fda$Country=='Ghana'),] #38 riga del Ghana
-sum(Ghana==0) #30 su 36, solo 6 valori in 3 anni e uno di questi è il più alto tra tutti i paesi
-matplot(t(stati_fda[-38 ,-1]), type='l')
-title('Country/Month 2016-2018')
-
-#nuovo dataset senza Ghana
-stati_new=stati[-which(stati$Country=='Ghana'),]
-stati_new[which(stati_new$x==max(stati_new$x)),1]
-
-Philippines=stati_fda[which(stati_fda$Country=='Philippines'),] #86 riga delle Philippines
-sum(Philippines==0) #10 su 36, 26 valori da metà del secondo anno in poi
-matplot(t(stati_fda[-c(38,86) ,-1]), type='l')
-title('Country/Month 2016-2018')
-
-stati_new1=stati_new[-which(stati_new$Country=='Philippines'),]
-stati_new1[which(stati_new1$x==max(stati_new1$x)),1]
-
-USA=stati_fda[which(stati_fda$Country=='USA'),] #123 riga degli USA
-sum(USA==0) #0 ci sono tutti i valori dei 36 mesi
-matplot(t(stati_fda[-c(38,86,123) ,-1]), type='l') #stupendo 
-title('Country/Month 2016-2018')
-
-data_fun = fData(1:(12*3), stati_fda[-c(38,86,123) ,-1])
-band_depth <- BD(Data = data_fun)
-modified_band_depth <- MBD(Data = data_fun)
-
-median_curve_manual <- data_fun[which.max(modified_band_depth),] # still an fData object
-
-plot(data_fun)
-grid_ecg <- seq(median_curve_manual$t0,median_curve_manual$tP,by=median_curve_manual$h)
-lines(grid_ecg,median_curve_manual$values)
-
-#plotto andamento USA
-#USA magari caso particolare essendo davvero grande, il più grande, magari è utile analizzare i SubCountry
-USA = stati_fda[which(stati_fda$Country=='USA'), ]
-data_fun = fData(1:(12*3), USA[ ,-1])
-plot(data_fun)
-title('USA Monthly collected plastic')
-# picchi raccolta a settembre/ottobre di ogni anno
+plot(raffinato)
+#molto meglio di zoom!!
 
 
-North_America=cleandata[which(cleandata$Continent=='North America'),] #North America ha 31482 dati su 40364 totali.
-
-subcountry = aggregate(North_America$TotalItems, by=list(SubCountry=North_America$SubCountry1, day=North_America$Day, month=North_America$MonthNum, year=North_America$Year), FUN=sum)
-nomi_subcountry = levels(factor(North_America$SubCountry1)) 
-zeros = rep(0, length(nomi_subcountry))
-subcountry_fda = data.frame(nomi_subcountry)
-
-#dataframe SubCountry/giorni
-count = 1;
-subcountry_fda = data.frame(matrix(0,nrow=263,ncol=1096)) 
-subcountry_fda[,1]=data.frame(nomi_subcountry)
-names(subcountry_fda) =  as.character(c('SubCountry', rep(c(1:31,1:28,1:31,1:30,1:31,1:30,1:31,1:31,1:30,1:31,1:30,1:31),3)))
-
-for (y in 2016:2018){
-  for (x in 1:12){
-    if(x==1||x==3||x==5||x==3||x==7||x==8||x==10||x==12){
-      for (i in 1:31){
-      temp = subcountry[which(subcountry$day==i & subcountry$month==x & subcountry$year==y), ]
-      index = match(temp$SubCountry, subcountry_fda$SubCountry)
-      subcountry_fda[index, count+1] = temp$x
-      count = count+1
-      }}
-    if(x==2){
-      for (i in 1:28){
-        temp = subcountry[which(subcountry$day==i & subcountry$month==x & subcountry$year==y), ]
-        index = match(temp$SubCountry, subcountry_fda$SubCountry)
-        subcountry_fda[index, count+1] = temp$x
-        count = count+1
-      }}
-    if(x==4||x==6||x==9||x==11){
-      for (i in 1:30){
-        temp = subcountry[which(subcountry$day==i & subcountry$month==x & subcountry$year==y), ]
-        index = match(temp$SubCountry, subcountry_fda$SubCountry)
-        subcountry_fda[index, count+1] = temp$x
-        count = count+1
-      }}
-    
-  }
-}
 
 
-data_fun = fData(1:(365*3), subcountry_fda[ ,-1])
-plot(data_fun)
-title('SubCountry/Days 2016-2018')
-#tanti tanti giorni nulli
-
-data_fun_subcountry = fData(1:(365*3), subcountry_fda[ ,-1])
-plot(data_fun_subcountry)
-title('SubCountry/Days 2016-2018')
-
-outliers_subcountry=outliergram(data_fun_subcountry, display = FALSE)
-outliers_subcountry$ID_outliers #5,10,35,48
-subcountry_fda[c(outliers_subcountry$ID_outliers),1] #California, Florida, North Carolina, Washington
-
-data_fun_subcountry_nooutlier = fData(1:(365*3), subcountry_fda[-c(outliers_subcountry$ID_outliers) ,-1])
-plot(data_fun_subcountry_nooutlier)
-title('SubCountry/Days 2016-2018')
 
 
-OutliersSubCountry=subcountry_fda[c(outliers_subcountry$ID_outliers) ,]
-data_fun_outliers = fData(1:(365*3), OutliersSubCountry[ ,-1])
-plot(data_fun_outliers)
-title('SubCountry/Days 2016-2018 Outliers')
+
+
+
+
+
+
