@@ -304,7 +304,7 @@ p_val #giorno settimana vs weekend NON significativo.
 #magari sono piu frequenti in estate o comunque in mesi non freddi
 seasonality=rep(0,length(North_America$Country))
 for (i in 1:length(North_America$Country)) {
-  if(North_America$Month[i]=="Apr"||North_America$Month[i]=="May"||North_America$Month[i]=="Jun"||North_America$Month[i]=="Jul"||North_America$Month[i]=="Aug"||North_America$Month[i]=="Sep")
+  if(North_America$Month[i]=="Jun"||North_America$Month[i]=="Jul"||North_America$Month[i]=="Aug")
     seasonality[i]=1
 }
 
@@ -361,7 +361,9 @@ for(perm in 1:B){
   T_EventType_seasonality[perm] <- summary.aov(aov(TotalItems.perm.H0EventType_seasonality ~ seasonality + EventType + EventType_seasonality))[[1]][3,4]
 }
 
-sum(T_EventType_seasonality >= T0_EventType_seasonality)/B #EventType_seasonality not significant
+sum(T_EventType_seasonality >= T0_EventType_seasonality)/B #0.09 (molto vicino a 0.1) EventType_seasonality significant se fissiamo alpha=0.1
+#se consideriamo alpha=0.05 diventa non significativo e quindi(dipende che scelta globale facciamo di alpha, quello piu 
+#usato e' 0.05):
 
 # TEST OF FACTOR Seasonality   (H0: alpha=0)
 T0_seasonality <- summary.aov(aov(North_America$TotalItems ~ seasonality + EventType))[[1]][1,4]
@@ -394,9 +396,14 @@ for(perm in 1:B){
 
 sum(T_seasonality >= T0_seasonality)/B #seasonality significant
 
-sum(T_EventType >= T0_EventType)/B #EventType significant
-#se fissiamo alpha=0.05 o 0.1 seasonality e EventType sono significativi
+sum(T_EventType >= T0_EventType)/B #EventType significant (questo lo sapevamo gia ma se mettiamo insieme le covariate
+#EventType e seasonality anche quest'ultima diventa significativa, quindi perfetto perche' le usiamo entrambe come covariate)
+#quindi se fissiamo alpha=0.05 seasonality e EventType sono significativi
 
+#quindi se scegliamo alpha=0.05 le nostre covariate saranno EventType e seasonality
+#quindi se scegliamo alpha=0.1 le nostre covariate di queste tre saranno EventType, seasonality e l'interazione EventType_seasonality
+
+#io sceglierei 0.05 perche quello piu usato frequentemente
 
 
 #mese, anno e loro interazione? 
