@@ -124,7 +124,7 @@ subcountry_fda = data.frame(nomi_subcountry)
 
 #dataframe SubCountry/giorni
 count = 1;
-subcountry_fda = data.frame(matrix(0,nrow=51,ncol=1096)) 
+subcountry_fda = data.frame(matrix(NA,nrow=51,ncol=1096)) 
 subcountry_fda[,1]=data.frame(nomi_subcountry)
 names(subcountry_fda) =  as.character(c('SubCountry', rep(c(1:31,1:28,1:31,1:30,1:31,1:30,1:31,1:31,1:30,1:31,1:30,1:31),3)))
 
@@ -178,3 +178,29 @@ OutliersSubCountry=subcountry_fda[c(outliers_subcountry$ID_outliers) ,]
 data_fun_outliers = fData(1:(365*3), OutliersSubCountry[ ,-1])
 plot(data_fun_outliers)
 title('SubCountry/Days 2016-2018 Outliers')
+
+
+
+stati = aggregate(USA$TotalItems, by=list(SubCountry=USA$SubCountry1, month=USA$MonthNum, year=USA$Year), FUN=sum)
+nomi_stati = levels(factor(USA$SubCountry1)) 
+zeros = rep(0, length(nomi_stati))
+stati_fda = data.frame(nomi_stati)
+
+#dataframe stati/mesi
+count = 1
+
+for (y in 2016:2018){
+  for (i in 1:12){
+    stati_fda = cbind(stati_fda, zeros);
+    temp = stati[which(stati$month==i & stati$year==y), ]
+    index = match(temp$SubCountry, stati_fda$nomi_stati)
+    stati_fda[index, count+1] = temp$x
+    count = count+1
+  }
+}
+names(stati_fda) =  as.character(c('SubCountry', 1:(12*3)))
+
+
+data_fun_stati = fData(1:(12*3), stati_fda[ ,-1])
+plot(data_fun_stati)
+title('SubCountry/Months 2016-2018 of USA')
