@@ -21,86 +21,44 @@ dim(cleandata[which(cleandata$Year=="2016"),])[1] #9273 osservazioni nel 2016
 dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
 dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
 
-##1)prima cosa faccio uno scatterplot
-#num volontari vs quantità plastica raccolta
-quartz()
-plot(cleandata$TotalVolunteers,cleandata$TotalItems)
+USA=cleandata[which(cleandata$Country=='USA'),]
 
-bin=hexbin(cleandata$TotalVolunteers,cleandata$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
+#ratio plot
+ratio=rep(0,length(USA$TotalItems))
+for (i in 1:length(USA$TotalItems)) {
+  ratio[i]=USA$TotalItems[i]/USA$TotalVolunteers[i]
+}
+ratio=as.data.frame(ratio)
+USA=cbind(USA,ratio)
 
-u=cleandata[,c(8,14)]
-tukey_depth=depth(u,method='Tukey')
-depthMedian(u,depth_params = list(method='Tukey'))
-u[which.max(tukey_depth),]
-depthContour(u,depth_params = list(method='Tukey'))
 
-depthPersp(u,depth_params = list(method='Tukey'))
+plot(USA$Area,USA$ratio)
 
-depthPersp(u,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(u,method='Mahalanobis') 
-
-depthMedian(u,depth_params = list(method='Mahalanobis'))
-
-depthContour(u,depth_params = list(method='Mahalanobis'))
-
-depthPersp(u,depth_params = list(method='Mahalanobis'))
+u=USA[,c(19,20)]
 
 bagplot(u)
 outlying_obs <- bagplot(u)$pxy.outlier
 
 ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
+cleanUSA <- u[-ind_outlying_obs,] #-4639 outliers TOP
 
-tukey_depth=depth(clean,method='Tukey')
-depthMedian(clean,depth_params = list(method='Tukey'))
-clean[which.max(tukey_depth),]
-depthContour(clean,depth_params = list(method='Tukey'))
+plot(cleanUSA)
 
-depthPersp(clean,depth_params = list(method='Tukey'))
+#plot Items vs Volunteers
 
-depthPersp(clean,depth_params = list(method='Tukey'),plot_method = 'rgl')
-
-maha_depth <- depth(clean,method='Mahalanobis') 
-
-depthMedian(clean,depth_params = list(method='Mahalanobis'))
-
-depthContour(clean,depth_params = list(method='Mahalanobis'))
-
-depthPersp(clean,depth_params = list(method='Mahalanobis'))
-
-bagplot(clean)
-plot(clean$TotalVolunteers,clean$TotalItems)
-
-bin=hexbin(clean$TotalVolunteers,clean$TotalItems, xbins=10, xlab="TotalVolunteers", ylab="TotalItems")
-plot(bin, main="Hexagonal Binning") 
-
-
-North_America=cleandata[which(cleandata$Continent=='North America'),] #30108 dati su 38953 totali
-
-u=North_America[,c(8,14)]
+u=USA[,c(8,14)]
+plot(u)
 
 bagplot(u)
 outlying_obs <- bagplot(u)$pxy.outlier
 
 ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-clean <- u[-ind_outlying_obs,]
-
-plot(cleandata$TotalVolunteers,cleandata$Area)
-u=cleandata[,c(8,19)]
-
-bagplot(u)
-outlying_obs <- bagplot(u)$pxy.outlier
-
-ind_outlying_obs <- which(apply(u,1,function(x) all(x %in% outlying_obs)))
-noutlier <- u[-ind_outlying_obs,]
+cleanUSA <- u[-ind_outlying_obs,] #-9235 outliers, abbiamo comunque 15953 dati ma possiamo togliere 9k dati? 
+#da chiedere e capire come risolvere
 
 par(mfrow=c(1,2))
-plot(cleandata$TotalVolunteers,cleandata$Area)
-plot(noutlier$TotalVolunteers,noutlier$Area)
-
-
+plot(u)
+plot(cleanUSA)
 
 
 
