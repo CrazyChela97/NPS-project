@@ -115,16 +115,16 @@ title('USA Monthly collected plastic')
 # picchi raccolta a settembre/ottobre di ogni anno
 
 
-North_America=cleandata[which(cleandata$Continent=='North America'),] #30108 dati su 38953 totali
+USA=cleandata[which(cleandata$Country=='USA'),] #25188 dati su 38953 totali
 
-subcountry = aggregate(North_America$TotalItems, by=list(SubCountry=North_America$SubCountry1, day=North_America$Day, month=North_America$MonthNum, year=North_America$Year), FUN=sum)
-nomi_subcountry = levels(factor(North_America$SubCountry1)) 
+subcountry = aggregate(USA$TotalItems, by=list(SubCountry=USA$SubCountry1, day=USA$Day, month=USA$MonthNum, year=USA$Year), FUN=sum)
+nomi_subcountry = levels(factor(USA$SubCountry1)) 
 zeros = rep(0, length(nomi_subcountry))
 subcountry_fda = data.frame(nomi_subcountry)
 
 #dataframe SubCountry/giorni
 count = 1;
-subcountry_fda = data.frame(matrix(0,nrow=263,ncol=1096)) 
+subcountry_fda = data.frame(matrix(0,nrow=51,ncol=1096)) 
 subcountry_fda[,1]=data.frame(nomi_subcountry)
 names(subcountry_fda) =  as.character(c('SubCountry', rep(c(1:31,1:28,1:31,1:30,1:31,1:30,1:31,1:31,1:30,1:31,1:30,1:31),3)))
 
@@ -158,7 +158,7 @@ for (y in 2016:2018){
 
 data_fun = fData(1:(365*3), subcountry_fda[ ,-1])
 plot(data_fun)
-title('SubCountry/Days 2016-2018')
+title('SubCountry/Days 2016-2018 of USA')
 #tanti tanti giorni nulli
 
 data_fun_subcountry = fData(1:(365*3), subcountry_fda[ ,-1])
