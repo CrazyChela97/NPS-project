@@ -1,4 +1,4 @@
-####ANOVA MANOVA DATASET COMPLETO ----> ANOVA DATASET USA ----> RISULTATI SODDISFACENTI
+####ANOVA DATASET COMPLETO ----> ANOVA DATASET USA Y=TOTALITEMS
 setwd("~/Documents/GitHub/NPS-project")
 library(rio)
 library(roahd)

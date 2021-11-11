@@ -60,5 +60,6 @@ par(mfrow=c(1,2))
 plot(u)
 plot(cleanUSA)
 
-
+CleanUsa=USA[-ind_outlying_obs,]
+save(CleanUsa,file="cleanUSA.Rdata")
 

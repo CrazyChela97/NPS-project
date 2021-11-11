@@ -1,5 +1,5 @@
-####ANOVA MANOVA DATASET COMPLETO ----> ANOVA DATASET USA ----> RISULTATI SODDISFACENTI
-setwd("~/Documents/GitHub/NPS-project")
+####ANOVA DATASET COMPLETO ----> ANOVA DATASET USA Y=TOTALITEMS/TOTALVOLUNTEERS
+usetwd("~/Documents/GitHub/NPS-project")
 library(rio)
 library(roahd)
 library(rgl)
