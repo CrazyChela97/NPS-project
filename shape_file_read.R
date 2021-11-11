@@ -8,15 +8,33 @@ library(sp)
 library(shp2graph)
 library(lubridate)
 
-setwd("~/Documents/GitHub/NPS-project/TM_WORLD_BORDERS_SIMPL-0")
-shape_file <- readOGR("EC2020_All_Cleanup_Events_2015_2018.shp", GDAL1_integer64_policy = TRUE)
+# shape plot usa+canada
+setwd("~/Downloads/USA_States")
+usa = readOGR("USA_States.shp")
+
+setwd("~/Downloads/Canada_Provinces")
+canada = readOGR("Canada_Provinces.shp")
+
+plot(usa)
+plot(canada, add=TRUE)
 
 
-shape2 =readOGR("TM_WORLD_BORDERS_SIMPL-0.3.shp")
-summary(shape2)
-plot(shape2)
-Nord_America = shape2[which(shape2@data$NAME=='Georgia'), ]
-points(shape_file, pch=20)
-plot(Nord_America)
+# provo con coordinate dati
 
-##sf pacchetto per shapefiles
+current_path=rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+cleandata=import("cleandata.Rdata")
+cleandata=cleandata[which(cleandata$Year!="2015"),] 
+sort(table(cleandata$Country))
+
+data = cleandata[which(cleandata$Country=='USA' | cleandata$Country=='Canada'), ]
+lat_long_point = cbind(data$Longitude1, data$Latitude1)
+x_y = lat_long_point
+x_y = data.frame(lat=x_y[,1], long=x_y[,2])
+coordinates(x_y) <- ~lat+long
+x_y@proj4string <- usa@proj4string
+
+quartz()
+plot(usa)
+plot(canada, add=TRUE)
+points(x_y, col = "deeppink", cex = 0.3, pch=20)
