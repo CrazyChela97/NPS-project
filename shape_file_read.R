@@ -4,6 +4,7 @@ library(maps)
 library(maptools)
 library(rgdal)
 library(sp)
+library(rio)
 
 library(shp2graph)
 library(lubridate)
@@ -27,7 +28,7 @@ cleandata=import("cleandata.Rdata")
 cleandata=cleandata[which(cleandata$Year!="2015"),] 
 sort(table(cleandata$Country))
 
-data = cleandata[which(cleandata$Country=='USA' | cleandata$Country=='Canada'), ]
+data = cleandata[which(cleandata$Country=='USA'), ]
 lat_long_point = cbind(data$Longitude1, data$Latitude1)
 x_y = lat_long_point
 x_y = data.frame(lat=x_y[,1], long=x_y[,2])
@@ -37,4 +38,4 @@ x_y@proj4string <- usa@proj4string
 quartz()
 plot(usa)
 plot(canada, add=TRUE)
-points(x_y, col = "deeppink", cex = 0.3, pch=20)
+points(x_y, col = "deeppink", cex = 0.35, pch=20)
