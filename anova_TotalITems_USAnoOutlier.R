@@ -347,6 +347,6 @@ sum(T_seasonality >= T0_seasonality)/B #0 seasonality significant
 sum(T_year >= T0_year)/B #0 year significant 
 
 #alpha=0.1 o 0.05
-#TotalItems ~ EventType + weekend + seasonality + EventType_seasonality + month + Year + month_year + seasonality_year
+#TotalItems ~ EventType + weekend + seasonality + EventType_seasonality + month + Year 
 
 
