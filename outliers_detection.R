@@ -1,5 +1,9 @@
-####GRAPHIC ANALYSIS
-setwd("~/Documents/GitHub/NPS-project")
+
+current_path=rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+
+# Packages ----------------------------------------------------------------
+
 library(rio)
 library(roahd)
 library(rgl)
@@ -11,8 +15,9 @@ library(packagefinder)
 library(aplpack)
 library(robustbase)
 
-current_path=rstudioapi::getActiveDocumentContext()$path
-setwd(dirname(current_path))
+
+# Import Dataset ----------------------------------------------------------
+
 cleandata=import("cleandata.Rdata")
 View(cleandata)
 
@@ -22,6 +27,9 @@ dim(cleandata[which(cleandata$Year=="2017"),])[1] #12296 osservazioni nel 2016
 dim(cleandata[which(cleandata$Year=="2018"),])[1] #17384 osservazioni nel 2016
 
 USA=cleandata[which(cleandata$Country=='USA'),]
+
+
+# Graphical Analysis ------------------------------------------------------
 
 #ratio plot
 ratio=rep(0,length(USA$TotalItems))

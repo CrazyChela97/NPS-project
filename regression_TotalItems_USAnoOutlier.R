@@ -28,6 +28,47 @@ plot(LandCleanup$TotalVolunteers,LandCleanup$TotalItems,main='Land Cleanup')
 plot(UnderwaterCleanup$TotalVolunteers,UnderwaterCleanup$TotalItems,main='Underwater Cleanup')
 plot(WatercraftCleanup$TotalVolunteers,WatercraftCleanup$TotalItems,main='Watercraft Cleanup')
 plot(MarineDebris$TotalVolunteers,MarineDebris$TotalItems,main='Marine Debris')
+dev.off()
+
+# prova trasformazione dati
+dati = CleanUsa
+index = which(dati$TotalItems/dati$TotalVolunteers > 5)   
+# considero solo missioni in cui ogni volontario ha raccolto (in media) almeno 5 items
+# caso più realistico
+plot(dati$TotalVolunteers[index], dati$TotalItems[index])
+
+# normalizzazione dati per area
+new_TI = dati$TotalItems / dati$Area
+plot(sqrt(dati$TotalVolunteers[index]), log(new_TI[index]))
+
+# sqrt di entrambe le quantità
+new_TI = log(dati$TotalItems)
+plot(dati$TotalVolunteers[index], new_TI[index])
+
+par(mfrow=c(2,2))
+plot(sqrt(LandCleanup$TotalVolunteers), sqrt(LandCleanup$TotalItems),main='Land Cleanup')
+plot(sqrt(UnderwaterCleanup$TotalVolunteers), sqrt(UnderwaterCleanup$TotalItems),main='Underwater Cleanup')
+plot(sqrt(WatercraftCleanup$TotalVolunteers), sqrt(WatercraftCleanup$TotalItems),main='Watercraft Cleanup')
+plot(sqrt(MarineDebris$TotalVolunteers), sqrt(MarineDebris$TotalItems),main='Marine Debris')
+dev.off()
+
+# box-cox di entrambi
+library(car)
+intermediate = powerTransform(dati$TotalItems ~ 1, family = "bcnPower")
+intermediate$lambda # circa -0.06
+TI_bc = bcnPower(dati$TotalItems, intermediate$lambda, gamma=intermediate$gamma)
+
+intermediate = powerTransform(dati$TotalVolunteers ~ 1, family = "bcnPower")
+intermediate$lambda # circa -0.2
+TV_bc = bcnPower(dati$TotalVolunteers, intermediate$lambda, gamma=intermediate$gamma)
+
+plot(dati$TotalVolunteers[index], TI_bc[index])
+
+
+
+
+
+
 
 for (i in 1:length(CleanUsa$EventType)) {
   if(CleanUsa$EventType[i]=='Land (beach, shoreline and inland) Cleanup')
