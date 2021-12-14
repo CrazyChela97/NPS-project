@@ -34,14 +34,14 @@ dev.off()
 dati = CleanUsa
 index = which(dati$TotalItems/dati$TotalVolunteers > 5)   
 # considero solo missioni in cui ogni volontario ha raccolto (in media) almeno 5 items
-# caso più realistico
+# caso piÃ¹ realistico
 plot(dati$TotalVolunteers[index], dati$TotalItems[index])
 
 # normalizzazione dati per area
 new_TI = dati$TotalItems / dati$Area
 plot(sqrt(dati$TotalVolunteers[index]), log(new_TI[index]))
 
-# sqrt di entrambe le quantità
+# sqrt di entrambe le quantitÃ 
 new_TI = log(dati$TotalItems)
 plot(dati$TotalVolunteers[index], new_TI[index])
 
@@ -127,7 +127,7 @@ plot(model_gam_interaction)
 
 
 model_gam=gam(CleanUsa$TotalItems ~ s(CleanUsa$TotalVolunteers,by=factor(EventType),bs='cr')  + weekend
-              + Month + Year,data = CleanUsa)
+                        + Month + Year,data = CleanUsa)
 
 summary(model_gam)
 
@@ -159,7 +159,7 @@ MarineDebris=CleanUsa[which(CleanUsa$EventType=='Marine Debris'),] #848
 
 
 modelgamLandCleanup=gam(LandCleanup$TotalItems ~ s(LandCleanup$TotalVolunteers,bs='cr') + as.factor(LandCleanup$weekend) +
-                          as.factor(LandCleanup$seasonality) + as.factor(LandCleanup$Month) + as.factor(LandCleanup$Year),data = LandCleanup)
+                           as.factor(LandCleanup$seasonality) + as.factor(LandCleanup$Month) + as.factor(LandCleanup$Year),data = LandCleanup)
 
 summary(modelgamLandCleanup)
 
@@ -171,7 +171,7 @@ plot(modelgamLandCleanup,col='red')
 
 
 modelgamUnderwaterCleanup=gam(UnderwaterCleanup$TotalItems ~ s(UnderwaterCleanup$TotalVolunteers,bs='cr') + as.factor(UnderwaterCleanup$weekend) +
-                                as.factor(UnderwaterCleanup$seasonality) + as.factor(UnderwaterCleanup$Month) + as.factor(UnderwaterCleanup$Year),data = UnderwaterCleanup)
+                          as.factor(UnderwaterCleanup$seasonality) + as.factor(UnderwaterCleanup$Month) + as.factor(UnderwaterCleanup$Year),data = UnderwaterCleanup)
 
 summary(modelgamUnderwaterCleanup)
 
