@@ -1,26 +1,31 @@
+
+current_path=rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
 rm(list=ls())
+
+
+# Packages ----------------------------------------------------------------
 
 library(maps)
 library(maptools)
 library(rgdal)
 library(sp)
 library(rio)
-
 library(shp2graph)
 library(lubridate)
 
-# shape plot usa+canada
-setwd("~/Downloads/USA_States")
-usa = readOGR("USA_States.shp")
 
-setwd("~/Downloads/Canada_Provinces")
+# Import Dataset ----------------------------------------------------------
+
+# shape files USA and Canada
+usa = readOGR("USA_States.shp")
 canada = readOGR("Canada_Provinces.shp")
 
 plot(usa)
 plot(canada, add=TRUE)
 
 
-# provo con coordinate dati
+# Coordinates Plot --------------------------------------------------------
 
 current_path=rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
@@ -35,7 +40,7 @@ x_y = data.frame(lat=x_y[,1], long=x_y[,2])
 coordinates(x_y) <- ~lat+long
 x_y@proj4string <- usa@proj4string
 
-quartz()
+x11()
 plot(usa)
 plot(canada, add=TRUE)
 points(x_y, col = "deeppink", cex = 0.35, pch=20)

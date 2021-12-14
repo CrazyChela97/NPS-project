@@ -1,17 +1,23 @@
 ### PLASTIC POLLUTION ###
+
+current_path=rstudioapi::getActiveDocumentContext()$path
+setwd(dirname(current_path))
+
+PP_2 <- read_csv("PP_2.csv")
+
+# Packages ----------------------------------------------------------------
+
 library(readr)
 library(roahd)
 library(dplyr)
 library(stringr)
+library(rio)
 
-current_path=rstudioapi::getActiveDocumentContext()$path
-setwd(dirname(current_path))
-PP_2 <- read_csv("PP_2.csv")
-
-#SECTION PULIZIA E PROBLEMI (MICHAEL E CAMI)
+# Data Cleaning -----------------------------------------------------------
 
 ###SUBSECTION: pulizia kontatti!!11!!
-##TODO: ricordarsi di cambiare i nomi delle colonne di sto dataset perchè fanno vomitare
+
+##TODO: ricordarsi di cambiare i nomi delle colonne di sto dataset perch? fanno vomitare
 ##TODO: scatterplot cose raccolte vs num di volontari
 
 
@@ -128,8 +134,8 @@ length(na.omit(newdata$Location)) #1569 senza Location ma almeno uno tra Country
 
 #sotto codice dove chi non ha CountryName_FromSource ma ha Location, mette CountryName_FromSource=l'ultima "parola"/"sigla" 
 #della stringa "Location" che corrisponde al Country (ho controllato uno per uno)
-#(considero stringhe Location diverse da 1, le faccio dopo, capire il perchè vedendo il codice sotto ma il succo 
-#è che la singola stringa non corrisponde sempre al Country ma a volte a un SubCountry)
+#(considero stringhe Location diverse da 1, le faccio dopo, capire il perch? vedendo il codice sotto ma il succo 
+#? che la singola stringa non corrisponde sempre al Country ma a volte a un SubCountry)
 
 for (i in 1:length(newdata$Location)) {
   if((is.na(newdata$Location)[i]==FALSE)&(length(unlist(strsplit(newdata$Location[i], ", ")))!=1)&(is.na(newdata$CountryName_FromSource[i])==TRUE))
@@ -157,13 +163,13 @@ for (i in 1:length(newdata$OBJECTID)) {
 }
 #ora tutte le righe hanno la Location
 location=aggregate(newdata$Location, by=list(zona=newdata$Location), FUN=length)
-length(location$zona) #ora 3603 location (prima 3337), i 5520 NA di prima hanno dato 266 zone in più
+length(location$zona) #ora 3603 location (prima 3337), i 5520 NA di prima hanno dato 266 zone in pi?
 #ora length(newdata$Location)-sum(location$x)= 0 NA
 
 #codice sotto: ho aggiunto con la pazienza di Dio a chi aveva solo una "parola" in Location
 #e nulla in CountryName_FromSource il corrispettivo CountryName_FromSource
 for (i in 1:length(newdata$Location)) {
-  if((length(unlist(strsplit(newdata$Location[i], ", ")))==1)&(is.na(newdata$CountryName_FromSource[i])==TRUE)) #questa riga è inutile, l'ho usata per identificare quali erano quelli con location con stringa singola e Country NA
+  if((length(unlist(strsplit(newdata$Location[i], ", ")))==1)&(is.na(newdata$CountryName_FromSource[i])==TRUE)) #questa riga ? inutile, l'ho usata per identificare quali erano quelli con location con stringa singola e Country NA
     if(newdata$Location[i]=="Singapore")
       newdata$CountryName_FromSource[i]="Singapore"
     if(newdata$Location[i]=="Hong Kong")
@@ -214,7 +220,7 @@ for (i in 1:length(newdata$Location)) {
 
 nrow(newdata[na.omit(newdata$CountryName_FromSource),]) #48001
 nrow(newdata[na.omit(newdata$Location),]) #48001
-#finalmente abbiamo un dataset senza NA nè nella colonna Location nè nella colonna CountryName_FromSource
+#finalmente abbiamo un dataset senza NA n? nella colonna Location n? nella colonna CountryName_FromSource
 
 newdata=newdata[,-c(1,3,9,10)]
 colnames(newdata)[c(2,3,4,14,16,17,18,19)] <- c("Country","SubCountry1","SubCountry2","TotalItems","%Plastic&Foam","%GlassRubberLumberMetal","Continent","Area")
@@ -225,7 +231,7 @@ colnames(newdata)[c(2,3,4,14,16,17,18,19)] <- c("Country","SubCountry1","SubCoun
 #a prima occhiata sembrano solo i primi 2121 da aggiustare che sono con la sigla mentre tutti gli
 #altri hanno il nome completo
 
-sum(is.na(newdata$SubCountry1)==TRUE) #c'è solo 1 SubCountry1 che è NA
+sum(is.na(newdata$SubCountry1)==TRUE) #c'? solo 1 SubCountry1 che ? NA
 which(is.na(newdata$SubCountry1)==TRUE) #riga 1206
 newdata$SubCountry1[1206]="NA"
 sum(is.na(newdata$SubCountry2)==TRUE) #1569 praticamente abbiamo quasi tutto il dataset con tutte le 4 colonne
@@ -257,7 +263,7 @@ for (i in 1:length(newdata$Location)) {
   if(newdata$SubCountry1[i]=="BC")
     newdata$SubCountry1[i]="British Columbia"
   if(newdata$SubCountry1[i]=="MA")
-    newdata$SubCountry1[i]="Manabí"
+    newdata$SubCountry1[i]="Manab?"
   if(newdata$SubCountry1[i]=="Ng")
     newdata$SubCountry1[i]="Ngerkeklau"
   if(newdata$SubCountry1[i]=="AL")
@@ -295,11 +301,11 @@ table(as.factor(newdata$Country))
 newdata=newdata[!duplicated(newdata), ]#-4319
 newdata=newdata[!duplicated(newdata[,c(1,2,3,4,7,9,10,11,12,13,14,15,16,17)]),] 
 
-##PARENTESI COSI' SI SALVANO LE COSE
-#save(newdata,file="cleandata.Rdata")
-##COSI' SI RIAPRONO
-#library(rio)
-#cleandata=import("cleandata.Rdata")
+
+# Saving Clean Dataset ----------------------------------------------------
+
+save(newdata,file="cleandata.Rdata")
+cleandata=import("cleandata.Rdata")
 
 
 
