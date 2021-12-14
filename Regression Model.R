@@ -41,7 +41,7 @@ levels(factor(CleanUsa$EventType))
 data = CleanUsa[ , c(5,6,7,8,9,11,13,14,19)]
 data$log_item = log(data$TotalItems)
 
-
+plot(data$TotalVolunteers, data$log_item)
 
 # Regressors Implementation -----------------------------------------------
 
@@ -51,7 +51,6 @@ for (i in 1:dim(data)[1]) {
   if(CleanUsa$DOW[i]=="Saturday"||CleanUsa$DOW[i]=="Sunday")
     weekend[i]=1
 }
-
 # DOW info removed and substituted with weekend
 data = data[ , -7]   
 data$weekend = weekend
@@ -66,7 +65,7 @@ data[which(data$Month %in% c('Jun', 'Jul', 'Aug')), 11] = 'Summer'
 data[which(data$Month %in% c('Sep', 'Oct', 'Nov')), 11] = 'Autumn'
 
 
-# Model Fitting -----------------------------------------------------------
+# GAM Model -----------------------------------------------------------
 
 gam_model = gam(log_item ~ s(TotalVolunteers, by=factor(EventType), bs='cr') + Area + 
                   weekend + Season + as.factor(Year), data=data)
@@ -83,7 +82,7 @@ par(new=TRUE)
 plot(gam_model, col='red')
 
 
-plot(data$TotalVolunteers, data$log_item)
+
 
 
 
