@@ -1,4 +1,4 @@
-####Regression DATASET USA senza i 9235 outliers Y=TOTALITEMS
+#### Regression DATASET USA senza i 9235 outliers Y=TOTALITEMS ####
 library(rio)
 library(roahd)
 library(rgl)
@@ -66,7 +66,7 @@ Month=as.factor(CleanUsa$Month)
 
 
 
-###REGRESSION###
+#### REGRESSION 1 ####
 library(ISLR2)
 library(car)
 library(mgcv)
@@ -81,6 +81,7 @@ summary(model_gam_interaction)
 
 plot(model_gam_interaction)
 
+ 
 
 #via EventType_seasonality e seasonality
 
@@ -93,6 +94,21 @@ summary(model_gam)
 
 plot(model_gam,col='red')
 
+#### REDUCE MODEL 1 ####
+
+library(car)
+
+H0 <- rbind(c(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+            c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0))
+
+rhs <- c(0, 0, 0, 0, 0, 0, 0)
+
+linearHypothesis(model_gam,A,b)
 
 
 
@@ -102,14 +118,7 @@ plot(model_gam,col='red')
 
 
 
-
-
-
-
-
-
-
-
+#### REGRESSION 2 ####
 
 LandCleanup=CleanUsa[which(CleanUsa$EventType=='Land Cleanup'),] #14820
 UnderwaterCleanup=CleanUsa[which(CleanUsa$EventType=='Underwater Cleanup'),] #54
