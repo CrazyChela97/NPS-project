@@ -41,7 +41,7 @@ levels(factor(CleanUsa$EventType))
 data = CleanUsa[ , c(5,6,7,8,9,11,13,14,19)]
 data$log_item = log(data$TotalItems)
 
-
+plot(data$TotalVolunteers, data$log_item)
 
 # Regressors Implementation -----------------------------------------------
 
@@ -51,7 +51,6 @@ for (i in 1:dim(data)[1]) {
   if(CleanUsa$DOW[i]=="Saturday"||CleanUsa$DOW[i]=="Sunday")
     weekend[i]=1
 }
-
 # DOW info removed and substituted with weekend
 data = data[ , -7]   
 data$weekend = weekend
@@ -66,7 +65,7 @@ data[which(data$Month %in% c('Jun', 'Jul', 'Aug')), 11] = 'Summer'
 data[which(data$Month %in% c('Sep', 'Oct', 'Nov')), 11] = 'Autumn'
 
 
-# Model Fitting -----------------------------------------------------------
+# GAM Model -----------------------------------------------------------
 
 gam_model = gam(log_item ~ s(TotalVolunteers, by=factor(EventType), bs='cr') + Area + 
                   weekend + Season + as.factor(Year), data=data)
@@ -83,8 +82,73 @@ par(new=TRUE)
 plot(gam_model, col='red')
 
 
-plot(data$TotalVolunteers, data$log_item)
 
 
+# NONPARAMETRIC REGRESSION ------------------------------------------------
 
+# Poly --------------------------------------------------------------------
+x <- data$TotalVolunteers
+y <- data$log_item
+
+# Choose the degree of the polynomial
+m_list <- lapply(1:8, function(degree){lm(y ~ poly(x, degree=degree) + as.factor(EventType) +
+                                              Area + weekend + Season + as.factor(Year), data=data)})
+do.call(anova, m_list)
+
+fit <- lm(y ~ poly(x , degree=7) + as.factor(EventType) + Area + weekend + Season +
+              as.factor(Year), data=data)
+
+# plot
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit, list(x=x.grid), se=T)
+plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit ,lwd =2, col =" blue")
+
+# plot se.bands
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+
+summary(fit)
+plot(fit)
+
+install.packages('nortest')
+library(nortest)
+ad.test(fit$residuals)
+
+# Step functions ----------------------------------------------------------
+
+# Even bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+table(cut(x,4))
+is(cut(x,4))
+
+fit2 <- lm(y ~ cut(x,4))
+
+# plot
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit2, list(x=x.grid), se=T)
+plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit, lwd =2, col ="blue")
+
+# diagnostic
+summary(fit2)
+plot(fit2)
+
+# uneven bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+br <- c(seq(0,100,by=25), seq(150,200,by=50))
+br
+table(cut(x, breaks = br))
+
+# model
+fit3 <- lm(y ~ cut(x, breaks = br))
+
+# plot
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit3, list(x=x.grid), se=T)
+plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit, lwd =2, col ="blue")
+
+# diagnostic
+summary(fit)
+{x11(); par(mfrow=c(2,2)); plot(fit3)}
 
