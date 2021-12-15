@@ -15,6 +15,7 @@ library(hexbin)
 library(packagefinder)
 library(aplpack)
 library(robustbase)
+library(tibble)
 
 
 # Import Dataset ----------------------------------------------------------
@@ -99,7 +100,9 @@ plot(clean_data$Area, clean_data$TotalItems)
 
 CleanUsa = CleanUsa[-ind_outliers, ]
 
-CleanUsa$log_Items=log(CleanUsa$TotalItems)
+log_Items=log(CleanUsa$TotalItems)
+CleanUsa=add_column(CleanUsa, log_Items, .after = "TotalItems") 
+
 # SAVING NEW DATASET
 save(CleanUsa,file="cleanUSA.Rdata")
 
