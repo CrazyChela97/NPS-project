@@ -69,7 +69,7 @@ bagplot(clean_data, show.whiskers = F, cex=0.6, main='Bagplot') # very better
 plot(clean_data$TotalVolunteers, clean_data$TotalItems)
 plot(clean_data$TotalVolunteers, log(clean_data$TotalItems))
 
-CleanUsa = USA[-ind_outliers, ]
+CleanUsa = USA[-ind_outliers, ] #da 22702 a 13354 
 
 
 # DEPTH ANALYSIS : Items vs Area ------------------------------------------
@@ -99,7 +99,7 @@ plot(clean_data$Area, clean_data$TotalItems)
 
 CleanUsa = CleanUsa[-ind_outliers, ]
 
-
+CleanUsa$log_Items=log(CleanUsa$TotalItems)
 # SAVING NEW DATASET
 save(CleanUsa,file="cleanUSA.Rdata")
 
