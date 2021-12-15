@@ -91,19 +91,18 @@ y <- data$log_item
 
 # Choose the degree of the polynomial
 m_list <- lapply(1:8, function(degree){lm(y ~ poly(x, degree=degree) + as.factor(EventType) +
-                                              Area + weekend + Season + as.factor(Year), data=data)})
+                                              Area + weekend + Season, data=data)})
 do.call(anova, m_list)
 
-fit <- lm(y ~ poly(x , degree=7) + as.factor(EventType) + Area + weekend + Season +
-              as.factor(Year), data=data)
+fit <- lm(y ~ poly(x , degree=7) + as.factor(EventType) + weekend + Season, data=data) # offset = Area
 summary(fit)
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
-preds <- predict(fit, list(x=data$log_item, EventType=data$EventType, Area=data$Area, 
-                           weekend=data$weekend, Season=data$Season, Year=data$Year), se=T)
+preds <- predict(fit, list(x=x, EventType=data$EventType, 
+                           weekend=data$weekend, Season=data$Season, Area=data$Area), se=T)
 plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
-lines(x, preds$fit ,lwd =2, col =" blue")
+points(x, preds$fit, lwd=2, col =" blue")
 
 # PROBLEMA : nel fitting ad ogni x sono associate più y in base ai valori delle dummies!
 #             bisogna capire come gestirlo!
@@ -170,6 +169,29 @@ se.bands = cbind(preds$fit + 2*preds$se.fit , preds$fit - 2*preds$se.fit)
 plot(x, y, xlim=range(x.grid), cex =.5, col="darkgrey")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
 matlines(x.grid, se.bands, lwd =1, col ="blue", lty =3)
+# visualize knots
+knots_pred = predict(model_ns, list(x=knots))
+points(knots, knots_pred, col='blue', pch=19)
+boundary_pred = predict(model_ns, list(x=boundary_knots))
+points(boundary_knots, boundary_pred, col='red', pch=19)
+
+
+
+# aggiungo regressori
+area_std = data$Area-mean(data$Area)
+
+model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots) 
+              + as.factor(EventType) + weekend + Season, data=data)
+summary(model_ns)
+
+preds = predict(model_ns, list(x=x, EventType=data$EventType, 
+                               weekend=data$weekend, Season=data$Season), se=T)
+se.bands = cbind(preds$fit + 2*preds$se.fit , preds$fit - 2*preds$se.fit)
+
+plot(x, y, xlim=range(x.grid), cex =.5, col="darkgrey")
+points(x, preds$fit, cex=.6, col ="blue")
+points(x, se.bands[,1], cex=.3, col ="red", pch=16)
+points(x, se.bands[,2], cex=.3, col ="red", pch=16)
 # visualize knots
 knots_pred = predict(model_ns, list(x=knots))
 points(knots, knots_pred, col='blue', pch=19)
