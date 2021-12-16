@@ -47,17 +47,6 @@ USA = USA[which(USA$Area!=max(USA$Area)), ]
 # DEPTH ANALYSIS : Items vs Volunteers --------------------------------------
 biv_data = USA[ , c(8,14)]
 
-depthContour(
-  as.matrix(clean_data),
-  depth_params = list(method = 'Tukey'),
-  points = F,
-  colors = colorRampPalette(c('white', 'navy')),
-  levels = 15,
-  pdmedian = F,     # segna la mediana
-  graph_params = list(cex=.01, pch=1),
-  pmean = F     # segna la media
-)
-
 # Bagplot
 BP <- bagplot(biv_data, cex=0.5, main='Bagplot')
 outlying_obs <- BP$pxy.outlier
@@ -71,9 +60,9 @@ ddPlot(x = clean_data, y = outlying_obs, depth_params = list(method='Tukey'), sc
 
 # Clean data overview
 plot(clean_data$TotalVolunteers, clean_data$TotalItems, pch=21, col='black', bg='orange',
-     cex=0.8, main='Data without Outliers')
+     cex=0.8, main='Data without Outliers', xlab='Total Volunteers', ylab='Collected Items')
 plot(clean_data$TotalVolunteers, log(clean_data$TotalItems), pch=21, col='black', bg='turquoise', 
-     cex=0.8, main='Transformed Data')
+     cex=0.8, main='Transformed Data', xlab='Total Volunteers', ylab='log( Items )')
 
 CleanUsa = USA[-ind_outliers, ] #da 22702 a 13354 
 
