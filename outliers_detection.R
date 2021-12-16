@@ -48,7 +48,7 @@ USA = USA[which(USA$Area!=max(USA$Area)), ]
 biv_data = USA[ , c(8,14)]
 
 depthContour(
-  as.matrix(biv_data),
+  as.matrix(clean_data),
   depth_params = list(method = 'Tukey'),
   points = F,
   colors = colorRampPalette(c('white', 'navy')),
@@ -59,19 +59,21 @@ depthContour(
 )
 
 # Bagplot
-BP <- bagplot(biv_data)
+BP <- bagplot(biv_data, cex=0.5, main='Bagplot')
 outlying_obs <- BP$pxy.outlier
 ind_outliers <- which(apply(biv_data, 1, function(x) all(x %in% outlying_obs)))
 clean_data <- biv_data[-ind_outliers, ]    
 
-bagplot(clean_data, show.whiskers = F, cex=0.6, main='Bagplot') # very better
+bagplot(clean_data, show.whiskers = F, cex=0.6, main='Bagplot', col ) # very better
 
 # DD plot
 ddPlot(x = clean_data, y = outlying_obs, depth_params = list(method='Tukey'), scale = T)
 
 # Clean data overview
-plot(clean_data$TotalVolunteers, clean_data$TotalItems)
-plot(clean_data$TotalVolunteers, log(clean_data$TotalItems))
+plot(clean_data$TotalVolunteers, clean_data$TotalItems, pch=21, col='black', bg='orange',
+     cex=0.8, main='Data without Outliers')
+plot(clean_data$TotalVolunteers, log(clean_data$TotalItems), pch=21, col='black', bg='turquoise', 
+     cex=0.8, main='Transformed Data')
 
 CleanUsa = USA[-ind_outliers, ] #da 22702 a 13354 
 

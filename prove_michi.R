@@ -164,3 +164,5 @@ boundary_pred = predict(model_ns, list(x=boundary_knots))
 points(boundary_knots, boundary_pred, col='red', pch=19)
 
 
+
+
