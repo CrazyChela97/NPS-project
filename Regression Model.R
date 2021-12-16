@@ -90,19 +90,17 @@ x <- data$TotalVolunteers
 y <- data$log_item
 
 # Choose the degree of the polynomial
-m_list <- lapply(1:8, function(degree){lm(y ~ poly(x, degree=degree) + as.factor(EventType) +
-                                              Area + weekend + Season, data=data)})
+m_list <- lapply(1:10, function(degree){lm(y ~ poly(x, degree=degree), data=data)})
 do.call(anova, m_list)
 
-fit <- lm(y ~ poly(x , degree=7) + as.factor(EventType) + weekend + Season, data=data) # offset = Area
+fit <- lm(y ~ poly(x , degree=8), data=data) # offset = Area
 summary(fit)
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
-preds <- predict(fit, list(x=x, EventType=data$EventType, 
-                           weekend=data$weekend, Season=data$Season, Area=data$Area), se=T)
+preds <- predict(fit, list(x=x.grid), se=T)
 plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
-points(x, preds$fit, lwd=2, col =" blue")
+lines(x.grid, preds$fit ,lwd =2, col =" blue")
 
 # PROBLEMA : nel fitting ad ogni x sono associate più y in base ai valori delle dummies!
 #             bisogna capire come gestirlo!
@@ -114,9 +112,32 @@ matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
 summary(fit)
 plot(fit)
 
-install.packages('nortest')
-library(nortest)
-ad.test(fit$residuals)
+# Rifaccio il modello con poly togliendo il dato #3588 dato ha elevata Leverage
+
+data2 <- data[-3588,]
+x <- data2$TotalVolunteers
+y <- data2$log_item
+m_list <- lapply(1:10, function(degree){lm(y ~ poly(x, degree=degree), data=data2)})
+do.call(anova, m_list)
+
+fit2 <- lm(y ~ poly(x , degree=8), data=data) # offset = Area
+summary(fit2)
+
+# plot
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit2, list(x=x.grid), se=T)
+plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit ,lwd =2, col =" blue")
+
+# PROBLEMA : nel fitting ad ogni x sono associate più y in base ai valori delle dummies!
+#             bisogna capire come gestirlo!
+
+# plot se.bands
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+
+summary(fit2)
+plot(fit2)
 
 # Step functions ----------------------------------------------------------
 
@@ -125,37 +146,69 @@ ad.test(fit$residuals)
 table(cut(x,4))
 is(cut(x,4))
 
-fit2 <- lm(y ~ cut(x,4))
+fit3 <- lm(y ~ cut(x,4))
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
-preds <- predict(fit2, list(x=x.grid), se=T)
+preds <- predict(fit3, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
 
 # diagnostic
-summary(fit2)
-plot(fit2)
+summary(fit3)
+plot(fit3)
 
 # uneven bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-br <- c(seq(0,100,by=25), seq(150,200,by=50))
+br <- c(seq(0,50,by=10),seq(75,100,by=25), seq(150,250,by=100))
 br
 table(cut(x, breaks = br))
 
 # model
-fit3 <- lm(y ~ cut(x, breaks = br))
+fit4 <- lm(y ~ cut(x, breaks = br))
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=1)
-preds <- predict(fit3, list(x=x.grid), se=T)
+preds <- predict(fit4, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+
 
 # diagnostic
-summary(fit)
-{x11(); par(mfrow=c(2,2)); plot(fit3)}
+summary(fit4)
+plot(fit4)
 
 
+# Weighted local averaging / Kernel regression ----------------------------
+
+# bandwidth=5, gaussian kernel
+fit5 <- npreg(x, y, ckertype='gaussian', bws=5) # anche bws = 3 non sembra male
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit5, list(x=x.grid), se=T)
+plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit, lwd =2, col ="blue")
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+
+summary(fit5)
+
+# adaptive kernel
+#   setting bwscaling=T, the supplied bandwidths are interpreted as 'scale factors'
+#   the bandwidth for each regression variable is computed by multiplying
+#   the scale factor with an adaptive measure of the spread of such variable
+# NOTA PER I RAGA: Non ho ancora capito bene cosa fa sta roba ma potrebbe essere la svolta
+fit6 <- npreg(x, as.numeric(y), ckertype='gaussian', bws=1.8, bwscaling=T) 
+x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+preds <- predict(fit6, list(x=x.grid), se=T)
+plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
+lines(x.grid, preds$fit, lwd =2, col ="blue")
+se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+
+summary(fit6)
 
 # Natural Splines ---------------------------------------------------------
 knots = quantile(x, probs=seq(0.25, 0.95, by=0.1))
