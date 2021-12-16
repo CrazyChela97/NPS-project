@@ -231,20 +231,21 @@ points(boundary_knots, boundary_pred, col='red', pch=19)
 
 
 # aggiungo regressori
-area_std = data$Area-mean(data$Area)
+area_std = CleanUsa$Area/round(mean(CleanUsa$Area))
 
 model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots) 
-              + as.factor(EventType) + weekend + Season, data=data)
+              + as.factor(EventType) + weekend + Season, offset=area_std, data=data)
 summary(model_ns)
 
-preds = predict(model_ns, list(x=x, EventType=data$EventType, 
-                               weekend=data$weekend, Season=data$Season), se=T)
+prova = data[100:200, ]
+preds = predict(model_ns, list(x=prova$TotalVolunteers, EventType=prova$EventType, 
+                               weekend=prova$weekend, Season=prova$Season, area_std=area_std[100:200]), se=T)
 se.bands = cbind(preds$fit + 2*preds$se.fit , preds$fit - 2*preds$se.fit)
 
-plot(x, y, xlim=range(x.grid), cex =.5, col="darkgrey")
-points(x, preds$fit, cex=.6, col ="blue")
-points(x, se.bands[,1], cex=.3, col ="red", pch=16)
-points(x, se.bands[,2], cex=.3, col ="red", pch=16)
+plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10))
+points(prova$TotalVolunteers, se.bands[,1], cex=.3, col ="red", pch=16)
+points(prova$TotalVolunteers, se.bands[,2], cex=.3, col ="red", pch=16)
+points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
 # visualize knots
 knots_pred = predict(model_ns, list(x=knots))
 points(knots, knots_pred, col='blue', pch=19)
