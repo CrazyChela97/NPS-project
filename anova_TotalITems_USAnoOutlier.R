@@ -202,6 +202,7 @@ sum(T_EventType >= T0_EventType)/B #0 EventType significant con alpha=0.1 o 0.05
 
 #TWO-WAYS ANOVA
 Year=as.factor(CleanUsa$Year)
+Month=as.factor(CleanUsa$Month)
 season_year=as.factor(CleanUsa$Year):as.factor(CleanUsa$Season)
 summary.aov(aov(CleanUsa$log_Items ~ Year + Month + season_year))
 
