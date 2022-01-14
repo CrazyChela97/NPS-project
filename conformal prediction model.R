@@ -146,7 +146,7 @@ lines(volunt.grid, preds$fit, lwd =2, col =" blue")
 #not so good
 
 
-
+##model 2 - 3: Poly and Natural splines con regressori 
 
 
 

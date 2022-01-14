@@ -1,3 +1,6 @@
+#################################################
+###             REGRESSION MODEL              ###
+#################################################
 
 current_path=rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
@@ -147,6 +150,7 @@ dev.off()
 
 plot(data$TotalVolunteers, data$log_item)
 par(new=TRUE)
+par(mfrow=c(2,2))
 plot(gam_model, col='red')
 
 
