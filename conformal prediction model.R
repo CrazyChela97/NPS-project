@@ -21,11 +21,12 @@ library(car)
 library(mgcv)
 library(splines)
 library(pbapply)
+library(conformalInference)
+library(splines)
 
 
 # Data Transformation -----------------------------------------------------
 CleanUsa=import("CleanUsa.Rdata")
-View(CleanUsa)
 
 for (i in 1:length(CleanUsa$EventType)) {
   if(CleanUsa$EventType[i]=='Land (beach, shoreline and inland) Cleanup')
@@ -40,8 +41,6 @@ levels(factor(CleanUsa$EventType))
 
 data = CleanUsa[ , c(5,6,7,8,9,11,13,14,19)]
 data$log_item = log(data$TotalItems)
-
-plot(data$TotalVolunteers, data$log_item)
 
 # Regressors Implementation -----------------------------------------------
 
@@ -80,8 +79,6 @@ points(Under$TotalVolunteers, Under$log_item, col = 'red')
 
 
 #  Conformal Models  -----------------------------------------------
-library(conformalInference)
-library(splines)
 
 ##model 1: conformal prediction without covariates
 attach(data)
@@ -144,11 +141,10 @@ lines(volunt.grid, preds$fit, lwd =2, col =" blue")
 #not so good
 
 
+# Poly --------------------------------------------------------------------
 ##model 2 - 3: Poly and Natural splines con regressori 
 test_data = data[which(data$Year == 2018), ]
 train_data = data[which(data$Year == 2016 | data$Year == 2017), ]
-
-# Poly --------------------------------------------------------------------
 
 x <- train_data$TotalVolunteers
 y <- train_data$log_item
@@ -181,15 +177,35 @@ matlines(volunt.grid, cbind(c_preds$up,c_preds$lo) ,lwd =1, col =" blue",lty =3)
 
 
 
+# Prova Michi -------------------------------------------------------------
 
+# poly model
+lm_train = lm.funs(intercept = T)$train.fun
+lm_predict = lm.funs(intercept = T)$predict.fun
+library(fastDummies)
 
+prova = dummy_cols(train_data, select_columns = c('EventType', 'Season'))
+design_matrix = matrix(poly(x, degree=8), ncol=8)
+design_matrix = cbind(design_matrix, prova[ ,c(10, 12:14, 16:18)])
+design_matrix = as.matrix(design_matrix)
+prova = dummy_cols(test_data, select_columns = c('EventType', 'Season'))
+pred_grid = matrix(poly(test_data$TotalVolunteers, degree=8, coefs = attr(poly(x, degree=8), "coefs")), ncol=8)
+pred_grid = cbind(pred_grid, prova[ ,c(10, 12:14, 16:18)])
+pred_grid = as.matrix(pred_grid)
 
+c_preds = conformal.pred(design_matrix, y, pred_grid, alpha=0.05, train.fun = lm_train,
+                         predict.fun = lm_predict, num.grid.pts = 200)
 
+plot(test_data$TotalVolunteers, test_data$log_item, ylim=range(c(c_preds$up, c_preds$lo)))
+points(test_data$TotalVolunteers, c_preds$pred, col ="red", ylim=range(c(c_preds$up, c_preds$lo)))
+points(test_data$TotalVolunteers, c_preds$up, col=" blue")
+points(test_data$TotalVolunteers, c_preds$lo, col=" blue")
 
+library(plotrix)
 
-
-
-
+plot(test_data$TotalVolunteers, test_data$log_item, col='red', pch=20, cex=0.5, 
+     ylim=range(c(c_preds$up, c_preds$lo)))
+plotCI(test_data$TotalVolunteers, c_preds$pred, ui=c_preds$up, li=c_preds$lo, add=TRUE, pch=16)
 
 
 
