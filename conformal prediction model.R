@@ -14,8 +14,6 @@ library(rgl)
 library(MASS)
 library(rgl)
 library(DepthProc)
-library(hexbin)
-library(packagefinder)
 library(aplpack)
 library(robustbase)
 library(ISLR2)
@@ -147,6 +145,39 @@ lines(volunt.grid, preds$fit, lwd =2, col =" blue")
 
 
 ##model 2 - 3: Poly and Natural splines con regressori 
+test_data = data[which(data$Year == 2018), ]
+train_data = data[which(data$Year == 2016 | data$Year == 2017), ]
+
+# Poly --------------------------------------------------------------------
+
+x <- train_data$TotalVolunteers
+y <- train_data$log_item
+
+model_poly <- lm(y ~ poly(x , degree=8)+ EventType + weekend + Season, data=train_data)
+
+train_poly=function(x1,y1,out=NULL){
+  lm(y1 ~ poly(x1 , degree=8) + train_data$EventType + train_data$weekend + train_data$Season)
+}
+
+predict_poly=function(obj, new_x){
+  predict(obj,new_x)$y
+}
+
+#pippo=train_ss(x,y)
+#predict_ss(pippo, as.data.frame(train_data$TotalVolunteers))
+
+#questo runna in 5 ore e un quarto raga
+volunt.grid = seq(range(x)[1],range(y)[2], length.out = dim(train_data)[1])
+
+design_matrix = matrix(poly(x , degree=8), nrow=length(y))
+pred_grid = matrix(poly(x,degree=8,coefs = attr(poly(x,degree=8),"coefs") ),ncol=2)
+
+c_preds=conformal.pred(design_matrix, y, pred_grid, alpha=0.05,
+                       verbose=T,train.fun = train_poly, predict.fun = predict_poly, num.grid.pts = 200)
+
+plot(x, y, xlim=range(volunt.grid), cex = 0.5, col="darkgrey ")
+lines(volunt.grid, c_preds$pred, lwd =2, col ="red", lty=3)
+matlines(volunt.grid, cbind(c_preds$up,c_preds$lo) ,lwd =1, col =" blue",lty =3)
 
 
 
