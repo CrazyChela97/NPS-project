@@ -438,15 +438,3 @@ mean_err = sum(abs(prova$log_item - preds$fit))/length(prova$log_item)
 mean_err # 0.737 circa
 
 
-
-
-
-
-
-
-
-
-
-
-
-
