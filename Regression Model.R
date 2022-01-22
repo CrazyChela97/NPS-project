@@ -26,7 +26,7 @@ library(pbapply)
 
 
 # Data Transformation -----------------------------------------------------
-CleanUsa=import("CleanUsa.Rdata")
+CleanUsa = import("CleanUsa.Rdata")
 # View(CleanUsa)
 
 for (i in 1:length(CleanUsa$EventType)) {
@@ -40,7 +40,7 @@ for (i in 1:length(CleanUsa$EventType)) {
 
 levels(factor(CleanUsa$EventType))
 
-data = CleanUsa[ , c(5,6,7,8,9,11,13,14,19,20)]
+data = CleanUsa[ , c(5,6,7,8,9,11,13,14,19)]
 data$log_item = log(data$TotalItems)
 
 plot(data$TotalVolunteers, data$log_item)
@@ -64,9 +64,13 @@ data$weekend = weekend
 # SEASONALITY : 4 Seasons 
 data$Season = rep('Winter', dim(data)[1])
 
-data[which(data$Month %in% c('Mar', 'Apr', 'May')), 12] = 'Spring'
-data[which(data$Month %in% c('Jun', 'Jul', 'Aug')), 12] = 'Summer'
-data[which(data$Month %in% c('Sep', 'Oct', 'Nov')), 12] = 'Autumn'
+data[which(data$Month %in% c('Mar', 'Apr', 'May')), 11] = 'Spring'
+data[which(data$Month %in% c('Jun', 'Jul', 'Aug')), 11] = 'Summer'
+data[which(data$Month %in% c('Sep', 'Oct', 'Nov')), 11] = 'Autumn'
+
+# saving new dataset
+save(data, file="RegData.Rdata")
+
 
 # Analysis for Categorical Regressors -------------------------------------
 
@@ -118,12 +122,25 @@ for (k in 1:c){
 cat = levels(factor(data$weekend))
 c = length(cat)
 
-par(mfrow=c(2,c/2))
+par(mfrow=c(c/2,c))
 for (k in 1:c){
   dati = data[which(data$weekend == cat[k]), ]
   plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
 }
+
 dev.off()
+
+# EventType con colori by cami
+Land=data[which(data$EventType=='Land Cleanup'),]
+Marine=data[which(data$EventType=='Marine Debris'),]
+Under=data[which(data$EventType=='Underwater Cleanup'),]
+Water=data[which(data$EventType=='Watercraft Cleanup'),]
+
+plot(Land$TotalVolunteers, Land$log_item, col = 'green')
+points(Marine$TotalVolunteers, Marine$log_item, col = 'yellow')
+points(Water$TotalVolunteers, Water$log_item, col = 'blue')
+points(Under$TotalVolunteers, Under$log_item, col = 'red')
+
 
 
 
@@ -170,10 +187,10 @@ m_list <- lapply(1:10, function(degree){lm(y ~ poly(x, degree=degree), data=data
 do.call(anova, m_list)
 # taking degree 8 since it's the last significant one
 
-fit <- lm(y ~ poly(x , degree=8), data=data) # offset = Area
+fit <- lm(y ~ poly(x , degree=8), data=data) 
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit, list(x=x.grid), se=T)
 plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit ,lwd =2, col =" blue")
@@ -182,7 +199,7 @@ matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
 
 # diagnostic : not so good
 summary(fit)
-
+# R2 = 0.5681
 par(mfrow=c(2,2))
 plot(fit)
 dev.off()
@@ -199,7 +216,7 @@ do.call(anova, m_list)
 fit2 <- lm(y ~ poly(x , degree=8), data=data) # offset = Area
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit2, list(x=x.grid), se=T)
 plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit ,lwd =2, col =" blue")
@@ -216,16 +233,17 @@ dev.off()
 
 
 # Step functions ----------------------------------------------------------
-
+x <- train_data$TotalVolunteers
+y <- train_data$log_item
 # Even bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 table(cut(x,5))
-is(cut(x,5))
+# is(cut(x,5))
 
 fit3 <- lm(y ~ cut(x,5))
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit3, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
@@ -269,7 +287,7 @@ dev.off()
 fit5 <- npreg(x, y, ckertype='gaussian', bws=5) # anche bws = 3 non sembra male
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit5, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
@@ -280,6 +298,7 @@ summary(fit5)
 
 # diagnostic 
 summary(fit5)
+# R2 = 0.532
 
 
 # adaptive kernel
@@ -292,7 +311,7 @@ summary(fit5)
 fit6 <- npreg(x, as.numeric(y), ckertype='gaussian', bws=1.8, bwscaling=T) 
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit6, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
@@ -313,7 +332,7 @@ boundary_knots
 fit7 = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots))
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=0.5)
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds = predict(fit7, list(x=x.grid), se=T)
 plot(x, y, xlim=range(x.grid), cex =.5, col="darkgrey")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
@@ -327,7 +346,7 @@ points(boundary_knots, boundary_pred, col='red', pch=19)
 
 # diagnostic : not bad
 summary(fit7)
-
+# R2 = 0.571
 par(mfrow=c(2,2))
 plot(fit7)
 dev.off()
@@ -338,14 +357,14 @@ dev.off()
 
 # Adding regressors to the best performing models, that is:
 # - NATURAL SPLINES
-# - GAUSSIAN KERNEL REGRESSION : non so aggiungere
+# - GAUSSIAN KERNEL REGRESSION : non so aggiungere ??
 # - POLY
 
 
 # Natural Splines ---------------------------------------------------------
 y = train_data$log_item
 x = train_data$TotalVolunteers
-knots = quantile(x, probs=c(seq(0.25, 0.95, by=0.1), 0.98, 0.99, 0.996))
+knots = quantile(x, probs=c(seq(0.35, 0.95, by=0.1), 0.98, 0.99, 0.996))
 boundary_knots <- quantile(x, probs=c(0.01, 0.999))
 knots
 boundary_knots
@@ -361,21 +380,25 @@ plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10
 points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
 
 # diagnostic : with regressor improved R2 + better fit
-summary(model_ns) # R2 = 0.581 , Radj = 579
-
+summary(model_ns)
+# R2 = 0.5809 , Radj = 5799
 par(mfrow=c(2,2))
 plot(model_ns)
 dev.off()
 
-# errore medio su tutti i dati test
-mean_err = sum(abs(prova$log_item - preds$fit))/length(prova$log_item)
-mean_err # 0.737 circa
+# errore su tutti i dati test
+RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
+RMSE # 0.8995 
 
 
 
 
 
 # Adding AREA variable as offset variable
+
+# NOTA : Ho tolto l'Area dal dataset perchè era inconcludente
+#        Quindi questo pezzo di codice NON FUNZIONA!!
+
 area_std = train_data$Area/50
 train_data$Area_std = area_std
 area_std = test_data$Area/50
@@ -401,8 +424,8 @@ plot(model_ns)
 dev.off()
 
 # errore medio su tutti i dati test
-mean_err = sum(abs(prova$log_item - preds$fit))/length(prova$log_item)
-mean_err # 0.79 circa
+RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
+RMSE 
 
 
 # PER I RAGA : alla fine il fitting è un po' peggiore quindi eviterei l'area
@@ -427,14 +450,14 @@ plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10
 points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
 
 # diagnostic : with regressor improved R2 + better fit
-summary(model_poly) # R2 = 0.578 , Radj = 577
-
+summary(model_poly)
+# R2 = 0.5785 , Radj = 0.5776
 par(mfrow=c(2,2))
 plot(model_poly)
 dev.off()
 
-# errore medio su tutti i dati test
-mean_err = sum(abs(prova$log_item - preds$fit))/length(prova$log_item)
-mean_err # 0.737 circa
+# errore su tutti i dati test
+RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
+RMSE # 0.898
 
 
