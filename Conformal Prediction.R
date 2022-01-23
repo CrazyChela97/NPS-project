@@ -10,7 +10,6 @@ rm(list=ls())
 
 library(rio)
 library(roahd)
-library(rgl)
 library(MASS)
 library(rgl)
 library(DepthProc)
