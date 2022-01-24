@@ -136,9 +136,20 @@ fit_MCD = covMcd(x = dati, alpha = .75, nsamp = "best")
 fit_MCD
 
 # Graphic analysis
-plot(fit_MCD, classic=TRUE, labels=F)
+plot(fit_MCD, classic=TRUE, labels.id=F)
 # MOLTO BAD : non lo userei
-
+# non toglie numeri : va fatta a mano
+plot(dati, xlim=c(1.5,10),ylim=c(0,10), col='darkgrey')
+# robust
+lines(ellipse(x =fit_MCD$cov, centre=fit_MCD$center), col="red", lwd=2)
+points(x=fit_MCD$center[1], y=fit_MCD$center[2], col="red", pch=16, cex=1.5)
+# classical
+n = nrow(dati)
+sample_mean = apply(dati, 2, mean)
+sample_cov = cov(dati)
+lines(ellipse(x = sample_cov, centre=sample_mean), col="blue",lwd=2)
+points(x=sample_mean[1],y=sample_mean[2], col="blue", pch=16, cex=1.5)
+legend("topleft", c('Robust', 'Classical'), lwd=rep(2,2), col=c("red", "blue"))
 
 
 # OTHERS #
@@ -150,9 +161,20 @@ fit_MCD = covMcd(x = dati, alpha = .75, nsamp = "best")
 fit_MCD
 
 # Graphic analysis
-plot(fit_MCD, classic=TRUE, labels=F)
+plot(fit_MCD, classic=TRUE, labels.id=F)
 # MOLTO BAD : non lo userei
-
+# non toglie numeri : va fatta a mano
+plot(dati, xlim=c(1,10),ylim=c(-0.5,8), col='darkgrey')
+# robust
+lines(ellipse(x =fit_MCD$cov, centre=fit_MCD$center), col="red", lwd=2)
+points(x=fit_MCD$center[1], y=fit_MCD$center[2], col="red", pch=16, cex=1.5)
+# classical
+n = nrow(dati)
+sample_mean = apply(dati, 2, mean)
+sample_cov = cov(dati)
+lines(ellipse(x = sample_cov, centre=sample_mean), col="blue",lwd=2)
+points(x=sample_mean[1],y=sample_mean[2], col="blue", pch=16, cex=1.5)
+legend("topleft", c('Robust', 'Classical'), lwd=rep(2,2), col=c("red", "blue"))
 
 # Robust Regression : plastic -------------------------------------------------------
 
@@ -173,6 +195,9 @@ fit_lm = lm(log_plastic ~ log_item, data=train_data)
 fit_lms = lmsreg(log_plastic ~ log_item, data=train_data)
 # LTS : least trimmed squares
 fit_lts = ltsReg(log_plastic ~ log_item, alpha=.75, mcd=TRUE, data=train_data)
+# MM-type robust estimators
+fit_rob = lmrob(log_plastic ~ log_item, data=train_data, method = 'MM', y=T)
+
 
 # plot comparison
 plot(x.train, y.train, col='darkgrey')
@@ -181,12 +206,53 @@ abline(fit_lms, col="darkblue", lwd=2)
 abline(fit_lts, col="darkgreen", lwd=2)
 legend("bottomright", c('OLS', 'LMS', 'LTS'), lwd=rep(2,4), col=c("red", "darkblue", "darkgreen"))
 
+plot(x.train, y.train, col='darkgrey')
+abline(fit_rob, col='red')
+
 # graphical analysis
 plot(fit_lts) # bad
 
-pred = predict(fit_lms, list(log_item = x.test))
+pred = predict(fit_rob, list(log_item = x.grid), se=TRUE)
 plot(x.test, y.test, col='darkgrey')
-lines(x.test, pred, col='darkblue')
+lines(x.grid, pred$fit, col='red', lwd=2)
+se.bands <- cbind(pred$fit + 2*pred$se.fit, pred$fit - 2*pred$se.fit)
+matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+# troppo troppo strette si sovrappongono a fit
+range(pred$se.fit) # infatti sono strettissimi
+
+lines(x.grid, pred$fit+pred$residual.scale, col='darkorange')
+lines(x.grid, pred$fit-pred$residual.scale, col='darkorange')
+# questi più bellini ma non so quanto abbia senso
+help(lmrob)
+
+# BOOTSTRAP per CI
+# anche questi strettissimi
+
+# Naive Bootstrap
+pred = predict(fit_rob)
+fitted.obs = pred
+res.obs = y.train - fitted.obs
+L.obs = summary(fit_rob)$coefficients[1,1]
+B = 2000
+alpha = 0.05
+T.boot = numeric(B)
+set.seed(2022)
+for(b in 1:B) {
+  response.b = fitted.obs + sample(res.obs, replace = T)
+  fm.b = lmrob(response.b ~ x.train, method = 'MM', y=T)
+  T.boot[b] = summary(fm.b)$coefficients[1,1]
+}
+
+# Reverse Percentile Intervals
+right.quantile = quantile(T.boot, 1 - alpha/2)
+left.quantile = quantile(T.boot, alpha/2)
+
+CI.RP = c(L.obs-(right.quantile - L.obs), L.obs-(left.quantile - L.obs))
+CI.RP
+
+C2 = summary(fit_rob)$coefficients[2,1]
+lines(x.grid, CI.RP[1]+ x.grid*C2, col='blue')
+lines(x.grid, CI.RP[2]+ x.grid*C2, col='blue')
 
 # Robust Regression : others -------------------------------------------------------
 
