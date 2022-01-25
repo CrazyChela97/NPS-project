@@ -154,14 +154,14 @@ fit_rob = lmrob(log_plastic ~ log_item, data=train_data, method = 'MM')
 
 
 # plot comparison
-plot(x.train, y.train, col='darkgrey', main='model comparison',
-     xlab='Collected Items', ylab='Plastic Items')
-abline(fit_lm, col="red3", lwd=2)
-abline(fit_lms, col="blue", lwd=2)
-abline(fit_lts, col="darkorange", lwd=2)
-abline(fit_rob, col='deeppink', lwd=2)
-legend("topleft", c('OLS', 'LMS', 'LTS', 'MM-Robust'), lwd=rep(2,4), 
-       col=c("red", "darkblue", "darkgreen", 'orange'))
+plot(x.train, y.train, col='darkgrey', main='Model Comparison',
+     xlab='Collected Items', ylab='Plastic Items', cex=0.7)
+abline(fit_lm, col="red3", lwd=3)
+abline(fit_lms, col="darkorange", lwd=3)
+abline(fit_lts, col="blue", lwd=3)
+#abline(fit_rob, col='deeppink', lwd=2)
+legend("topleft", c('OLS', 'LMS', 'LTS'), lwd=rep(3,3), 
+       col=c("red3", "darkorange", "blue"))
 
 plot(x.train, y.train, col='darkgrey')
 abline(fit_rob, col='red')

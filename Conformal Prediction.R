@@ -100,13 +100,15 @@ lm_predict = lm.funs(intercept = T)$predict.fun
 
 # Design Matrix with Regressors
 dummies = dummy_cols(train_data, select_columns = c('EventType', 'Season'))
+interaction = dummies$`EventType_Marine Debris`*dummies$Season_Summer
 design_matrix = matrix(poly(x.train, degree=8), ncol=8)
-design_matrix = cbind(design_matrix, dummies[ ,c(10, 12:14, 16:18)])
+design_matrix = cbind(design_matrix, dummies[ ,c(10, 12:14, 16:18)], interaction)
 design_matrix = as.matrix(design_matrix)
 # Design Matrix of New Obs
 dummies = dummy_cols(test_data, select_columns = c('EventType', 'Season'))
+interaction = dummies$`EventType_Marine Debris`*dummies$Season_Summer
 pred_grid = matrix(poly(x.test, degree=8, coefs = attr(poly(x.train, degree=8), "coefs")), ncol=8)
-pred_grid = cbind(pred_grid, dummies[ ,c(10, 12:14, 16:18)])
+pred_grid = cbind(pred_grid, dummies[ ,c(10, 12:14, 16:18)], interaction)
 pred_grid = as.matrix(pred_grid)
 
 c_preds_poly = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 
@@ -184,13 +186,15 @@ lm_predict = lm.funs(intercept = T)$predict.fun
 
 # Design Matrix with Regressors
 dummies = dummy_cols(train_data, select_columns = c('EventType', 'Season'))
+interaction = dummies$`EventType_Marine Debris`*dummies$Season_Summer
 design_matrix = ns(x.train, knots=knots, Boundary.knots=boundary_knots)
-design_matrix = cbind(design_matrix, dummies[ ,c(10, 12:14, 16:18)])
+design_matrix = cbind(design_matrix, dummies[ ,c(10, 12:14, 16:18)], interaction)
 design_matrix = as.matrix(design_matrix)
 # Design Matrix of New Obs
 dummies = dummy_cols(test_data, select_columns = c('EventType', 'Season'))
+interaction = dummies$`EventType_Marine Debris`*dummies$Season_Summer
 pred_grid = matrix(ns(x.test, knots=knots, Boundary.knots=boundary_knots), nrow=length(x.test))
-pred_grid = cbind(pred_grid, dummies[ ,c(10, 12:14, 16:18)])
+pred_grid = cbind(pred_grid, dummies[ ,c(10, 12:14, 16:18)], interaction)
 pred_grid = as.matrix(pred_grid)
 
 c_preds_ns = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 

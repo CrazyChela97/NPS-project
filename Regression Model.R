@@ -382,7 +382,7 @@ knots
 boundary_knots
 
 model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots) 
-              + EventType + weekend + Season, data=train_data) 
+              + EventType + weekend + Season + EventType:Season, data=train_data) 
 
 # plot considering TEST data (2018)
 prova = test_data
@@ -394,14 +394,14 @@ points(prova$TotalVolunteers, preds$fit, pch=16, cex=.6, col ="red3")
 
 # diagnostic : with regressor improved R2 + better fit
 summary(model_ns)
-# R2 = 0.5809 , Radj = 5799
+# R2 = 0.582 , Radj = 0.580
 par(mfrow=c(2,2))
 plot(model_ns)
 dev.off()
 
 # errore su tutti i dati test
 RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
-RMSE # 0.8995 
+RMSE # 0.901
 
 
 
@@ -411,7 +411,8 @@ RMSE # 0.8995
 x <- train_data$TotalVolunteers
 y <- train_data$log_item
 
-model_poly <- lm(y ~ poly(x , degree=8)+ EventType + weekend + Season, data=train_data)
+model_poly <- lm(y ~ poly(x , degree=8)+ EventType + weekend + Season
+                 + EventType:Season, data=train_data)
 
 # plot considering TEST data (2018)
 prova = test_data
@@ -423,13 +424,13 @@ points(prova$TotalVolunteers, preds$fit, cex=.6, col ="blue", pch=16)
 
 # diagnostic : with regressor improved R2 + better fit
 summary(model_poly)
-# R2 = 0.5785 , Radj = 0.5776
+# R2 = 0.5795 , Radj = 0.5781
 par(mfrow=c(2,2))
 plot(model_poly)
 dev.off()
 
 # errore su tutti i dati test
 RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
-RMSE # 0.898
+RMSE # 0.899
 
 
