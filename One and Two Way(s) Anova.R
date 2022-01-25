@@ -32,10 +32,10 @@ WatercraftCleanup=CleanUsa[which(CleanUsa$EventType=='Watercraft (powerboat, sai
 MarineDebris=CleanUsa[which(CleanUsa$EventType=='Marine Debris Accumulation Survey'),] #912
 
 par(mfrow=c(2,2))
-plot(LandCleanup$TotalVolunteers,LandCleanup$log_Items,main='Land Cleanup')
-plot(UnderwaterCleanup$TotalVolunteers,UnderwaterCleanup$log_Items,main='Underwater Cleanup')
-plot(WatercraftCleanup$TotalVolunteers,WatercraftCleanup$log_Items,main='Watercraft Cleanup')
-plot(MarineDebris$TotalVolunteers,MarineDebris$log_Items,main='Marine Debris')
+plot(LandCleanup$TotalVolunteers,LandCleanup$log_Items,main='Land Cleanup',col='blue',xlab = 'TotalVolunteers',ylab = 'TotalItems')
+plot(UnderwaterCleanup$TotalVolunteers,UnderwaterCleanup$log_Items,main='Underwater Cleanup',col='blue',xlab = 'TotalVolunteers',ylab = 'TotalItems')
+plot(WatercraftCleanup$TotalVolunteers,WatercraftCleanup$log_Items,main='Watercraft Cleanup',col='blue',xlab = 'TotalVolunteers',ylab = 'TotalItems')
+plot(MarineDebris$TotalVolunteers,MarineDebris$log_Items,main='Marine Debris',col='blue',xlab = 'TotalVolunteers',ylab = 'TotalItems')
 
 # Clearly not Gaussian, hypothesis violation for ANOVA --------------------
 

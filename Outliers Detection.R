@@ -68,7 +68,7 @@ plot(clean_data$TotalVolunteers, clean_data$TotalItems, pch=21, col='black', bg=
 plot(clean_data$TotalVolunteers, log(clean_data$TotalItems), pch=21, col='black', bg='turquoise', 
      cex=0.8, main='Transformed Data', xlab='Total Volunteers', ylab='log( Items )')
 
-CleanUsa = USA[-ind_outliers, ] #da 22702 a 13354 
+CleanUsa = USA[-ind_outliers, ] #from 22702 to 13354 
 
 
 # DEPTH ANALYSIS : Items vs Area ------------------------------------------
@@ -86,9 +86,9 @@ bagplot(clean_data, show.whiskers = F, cex=0.6, main='Bagplot') # very better
 ddPlot(x = clean_data, y = outlying_obs, depth_params = list(method='Tukey'))
 
 # Clean data overview
-plot(clean_data$Area, clean_data$TotalItems)
+plot(biv_data$Area, biv_data$TotalItems)
 
-CleanUsa = CleanUsa[-ind_outliers, ]
+CleanUsa = CleanUsa[-ind_outliers, ] #from 13354 to 13184
 
 log_Items=log(CleanUsa$TotalItems)
 CleanUsa=add_column(CleanUsa, log_Items, .after = "TotalItems") 
