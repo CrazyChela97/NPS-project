@@ -95,37 +95,42 @@ for (k in 1:c){
   plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
 }
 
+colors = c('turquoise', 'orange', 'deeppink', 'greenyellow')
 
 # EVENT TYPE
 cat = levels(factor(data$EventType))
 c = length(cat)
-
+colors = c('turquoise', 'orange', 'deeppink', 'greenyellow')
 par(mfrow=c(2,c/2))
 for (k in 1:c){
   dati = data[which(data$EventType == cat[k]), ]
-  plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
+  plot(dati$TotalVolunteers, dati$log_item, main=cat[k], bg=colors[k], 
+       pch=21, xlab='Total Volunteers', ylab='Collected Items')
 }
 
 
 # SEASON
 cat = levels(factor(data$Season))
 c = length(cat)
-
+colors = c('orange', 'greenyellow', 'deeppink','turquoise')
 par(mfrow=c(2,c/2))
 for (k in 1:c){
   dati = data[which(data$Season == cat[k]), ]
-  plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
+  plot(dati$TotalVolunteers, dati$log_item, main=cat[k], bg=colors[k], 
+       pch=21, xlab='Total Volunteers', ylab='Collected Items')
 }
 
 
 # WEEKEND
 cat = levels(factor(data$weekend))
 c = length(cat)
-
+colors = c('deeppink', 'greenyellow')
+title=c('Weekdays', 'Weekend')
 par(mfrow=c(c/2,c))
 for (k in 1:c){
   dati = data[which(data$weekend == cat[k]), ]
-  plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
+  plot(dati$TotalVolunteers, dati$log_item, main=title[k], bg=colors[k], 
+       pch=21, xlab='Total Volunteers', ylab='Collected Items')
 }
 
 dev.off()
