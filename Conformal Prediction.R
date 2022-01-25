@@ -94,6 +94,10 @@ matlines(volunt.grid ,cbind(c_preds_split$up,c_preds_split$lo) ,lwd =1, col =" r
 
 
 # Poly Model - COMPLETE -------------------------------------------------------------
+x.test = test_data$TotalVolunteers
+y.test = test_data$log_item
+x.grid = seq(range(x.test)[1], range(x.test)[2], by=1)
+
 
 lm_train = lm.funs(intercept = T)$train.fun
 lm_predict = lm.funs(intercept = T)$predict.fun
@@ -126,7 +130,7 @@ for (i in 1:length(y.test)){
   excluded = excluded + (y.test[i]<c_preds_poly$lo[i]) + (y.test[i]>c_preds_poly$up[i])
 }
 exc.perc.poly = excluded/length(y.test)
-exc.perc.poly # 5.55%
+exc.perc.poly # 5.65%
 
 
 
