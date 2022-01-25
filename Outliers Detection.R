@@ -1,3 +1,7 @@
+################################################
+###           OUTLIERS DETECTION             ###
+################################################
+
 
 current_path=rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path))
