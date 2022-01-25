@@ -213,6 +213,6 @@ for (i in 1:length(y.test)){
   excluded = excluded + (y.test[i]<c_preds_ns$lo[i]) + (y.test[i]>c_preds_ns$up[i])
 }
 exc.perc.ns = excluded/length(y.test)
-exc.perc.ns # 5.61 %
+exc.perc.ns # 5.7 %
 
 
