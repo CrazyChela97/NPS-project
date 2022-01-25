@@ -136,10 +136,10 @@ Marine=data[which(data$EventType=='Marine Debris'),]
 Under=data[which(data$EventType=='Underwater Cleanup'),]
 Water=data[which(data$EventType=='Watercraft Cleanup'),]
 
-plot(Land$TotalVolunteers, Land$log_item, col = 'green')
-points(Marine$TotalVolunteers, Marine$log_item, col = 'yellow')
-points(Water$TotalVolunteers, Water$log_item, col = 'blue')
-points(Under$TotalVolunteers, Under$log_item, col = 'red')
+plot(Land$TotalVolunteers, Land$log_item, pch=16, cex=0.5, col = 'forestgreen')
+points(Marine$TotalVolunteers, Marine$log_item, pch=16, cex=0.5,col = 'gold')
+points(Water$TotalVolunteers, Water$log_item, pch=16, cex=0.5, col = 'lightskyblue')
+points(Under$TotalVolunteers, Under$log_item, pch=16, cex=0.5,col = 'firebrick3')
 
 
 
@@ -155,8 +155,8 @@ train_data = data[which(data$Year == 2016 | data$Year == 2017), ]
 
 # GAM Model -----------------------------------------------------------
 
-gam_model = gam(log_item ~ s(TotalVolunteers, by=factor(Season), bs='cr') + Area + 
-                  weekend + EventType + as.factor(Year), data=data)
+gam_model = gam(log_Items ~ s(TotalVolunteers, by=factor(Season), bs='cr') + Area + 
+                  weekend + EventType + as.factor(Year), data=CleanUsa)
 summary(gam_model) 
 # dal summary sembra tutto bellino
 
@@ -237,15 +237,15 @@ x <- train_data$TotalVolunteers
 y <- train_data$log_item
 # Even bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-table(cut(x,5))
+table(cut(x,10))
 # is(cut(x,5))
 
-fit3 <- lm(y ~ cut(x,5))
+fit3 <- lm(y ~ cut(x,10))
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit3, list(x=x.grid), se=T)
-plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
+plot(x, y, xlim=range(x.grid), ylim = c(2.8,10), cex =.5, col =" darkgrey ", main="")
 lines(x.grid, preds$fit, lwd =2, col ="blue")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
 matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
@@ -260,7 +260,7 @@ dev.off()
 
 
 # uneven bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-br <- c(0, 2, 5, seq(10,50,by=10), seq(75,100,by=25), seq(150,250,by=50))
+br <- c(0, 2, 5, seq(10,50,by=10), seq(75,100,by=25), max(data$TotalVolunteers))
 table(cut(x, breaks = br))
 
 fit4 <- lm(y ~ cut(x, breaks = br))
@@ -275,6 +275,7 @@ matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
 
 # diagnostic : not very good
 summary(fit4)
+ad.test(fit4$residuals)
 
 par(mfrow=c(2,2))
 plot(fit4)
@@ -324,8 +325,8 @@ summary(fit6)
 
 
 # Natural Splines ---------------------------------------------------------
-knots = quantile(x, probs=c(seq(0.25, 0.95, by=0.1), 0.98, 0.99, 0.996))
-boundary_knots <- quantile(x, probs=c(0.01, 0.999))
+knots = quantile(x, probs=c(seq(0.25, 0.95, by=0.1)))
+boundary_knots <- quantile(x, probs=c(0.001, 0.99))
 knots
 boundary_knots
 
@@ -346,6 +347,7 @@ points(boundary_knots, boundary_pred, col='red', pch=19)
 
 # diagnostic : not bad
 summary(fit7)
+ad.test(fit7$residuals)
 # R2 = 0.571
 par(mfrow=c(2,2))
 plot(fit7)
@@ -376,8 +378,8 @@ model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots)
 prova = test_data
 preds = predict(model_ns, list(x=prova$TotalVolunteers, EventType=prova$EventType, 
                                weekend=prova$weekend, Season=prova$Season), se=T)
-plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10))
-points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
+plot(prova$TotalVolunteers, prova$log_item, cex =.5, col="darkgrey", ylim=c(2,10))
+points(prova$TotalVolunteers, preds$fit, pch=16,cex=.5, col ="blue")
 
 # diagnostic : with regressor improved R2 + better fit
 summary(model_ns)

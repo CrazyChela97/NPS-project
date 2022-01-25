@@ -69,9 +69,13 @@ pred_grid = matrix(poly(x.grid, degree=8, coefs = attr(poly(x.train, degree=8),"
 c_preds = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 
                          train.fun=lm_train, predict.fun=lm_predict, num.grid.pts = 200)
 
-plot(x.test, y.test, ylim=range(c(c_preds$up,c_preds$lo)), cex = 0.5, col="darkgrey")
-lines(x.grid, c_preds$pred, lwd=2, col="red")
-matlines(x.grid, cbind(c_preds$up,c_preds$lo), lwd=2, col="blue", lty =3)
+plot(x.test, y.test, ylim=range(c(c_preds$up,c_preds$lo)), cex = 0.5, col="gray40",
+     main='Polynomial Conformal Prediction', xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, c_preds$pred, lwd=3, col="blue")
+matlines(x.grid, cbind(c_preds$up,c_preds$lo), lwd=2, col="deepskyblue", lty =1)
+n = length(x.grid)
+polygon(x=c(x.grid[1:n], x.grid[n:1]), y=c(c_preds$up[1:n], c_preds$lo[n:1]), 
+        col='lightskyblue', border = NA, density=20)
 # ok nice
 
 
@@ -108,8 +112,10 @@ pred_grid = as.matrix(pred_grid)
 c_preds_poly = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 
                          train.fun=lm_train, predict.fun=lm_predict, num.grid.pts = 200)
 
-plot(x.test, y.test, ylim=range(c(c_preds_poly$up, c_preds_poly$lo)), cex = 0.5, col="darkgrey")
-plotCI(x.test, c_preds_poly$pred, ui=c_preds_poly$up, li=c_preds_poly$lo, add=TRUE, pch=16)
+plot(x.test, y.test, ylim=range(c(c_preds_poly$up, c_preds_poly$lo)), cex = 0.5, col="gray40",
+     main='Polynomial Conformal Prediction', xlab='Total Volunteers', ylab='Collected Items')
+plotCI(x.test, c_preds_poly$pred, ui=c_preds_poly$up, li=c_preds_poly$lo, add=TRUE, pch=16,
+       cex=0.7, slty=2, scol='lightskyblue', col='blue', lwd=0.8)
 
 
 # GOF check
@@ -117,8 +123,8 @@ excluded = 0
 for (i in 1:length(y.test)){
   excluded = excluded + (y.test[i]<c_preds_poly$lo[i]) + (y.test[i]>c_preds_poly$up[i])
 }
-exc.perc.ns = excluded/length(y.test)
-exc.perc.ns # 5.6 %
+exc.perc.poly = excluded/length(y.test)
+exc.perc.poly # 5.55%
 
 
 
@@ -139,9 +145,8 @@ y.test = test_data$log_item
 x.grid = seq(range(x.test)[1], range(x.test)[2], by=1)
 
 preds = predict(model_ns, list(TotalVolunteers = x.grid), se=T)
-plot(x.test, y.test, xlim=range(x.grid), cex = 0.5, col="darkgrey ")
+plot(x.test, y.test, xlim=range(x.grid), cex = 0.5, col="darkgrey")
 lines(x.grid, preds$fit ,lwd =2, col =" blue")
-
 
 
 
@@ -161,9 +166,13 @@ pred_grid = matrix(ns(x.grid, knots=knots, Boundary.knots=boundary_knots), nrow=
 c_preds = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 
                          train.fun=lm_train, predict.fun=lm_predict, num.grid.pts = 200)
 
-plot(x.test, y.test, ylim=range(c(c_preds$up,c_preds$lo)), cex = 0.5, col="darkgrey")
-lines(x.grid, c_preds$pred, lwd=2, col="red")
-matlines(x.grid, cbind(c_preds$up,c_preds$lo), lwd=2, col="blue", lty =3)
+plot(x.test, y.test, ylim=range(c(c_preds$up,c_preds$lo)), cex = 0.5, col="gray40",
+     main='Natural Splines Conformal Prediction', xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, c_preds$pred, lwd=3, col="orangered3")
+matlines(x.grid, cbind(c_preds$up,c_preds$lo), lwd=2, col="darkorange2", lty =1)
+n = length(x.grid)
+polygon(x=c(x.grid[1:n], x.grid[n:1]), y=c(c_preds$up[1:n], c_preds$lo[n:1]), 
+        col='tan1', border = NA, density=20)
 # ok nice
 
 
@@ -187,12 +196,11 @@ pred_grid = as.matrix(pred_grid)
 c_preds_ns = conformal.pred(design_matrix, y.train, pred_grid, alpha=0.05, verbose=T, 
                          train.fun=lm_train, predict.fun=lm_predict, num.grid.pts = 200)
 
-c_preds_ns = c_preds
 
-plot(x.test, y.test, ylim=range(c(c_preds_ns$up, c_preds_ns$lo)), 
-     pch=16, cex = 0.7, col="deeppink")
+plot(x.test, y.test, ylim=range(c(c_preds_ns$up, c_preds_ns$lo)), cex = 0.5, col="gray40", 
+     main='Natural Splines Conformal Prediction', xlab='Total Volunteers', ylab='Collected Items')
 plotCI(x.test, c_preds_ns$pred, ui=c_preds_ns$up, li=c_preds_ns$lo, add=TRUE, 
-       pch=16, cex=0.7, slty=2, scol='darkgrey', col='black')
+       pch=16, cex=0.7, slty=2, scol='orange', col='orangered3', lwd=0.7)
 
 
 # GOF check
@@ -201,9 +209,6 @@ for (i in 1:length(y.test)){
   excluded = excluded + (y.test[i]<c_preds_ns$lo[i]) + (y.test[i]>c_preds_ns$up[i])
 }
 exc.perc.ns = excluded/length(y.test)
-exc.perc.ns # 5.6 %
+exc.perc.ns # 5.61 %
 
-
-
-y_fit_test = c_preds$pred
 
