@@ -190,12 +190,15 @@ do.call(anova, m_list)
 fit <- lm(y ~ poly(x , degree=8), data=data) 
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=1)
+x.test = test_data$TotalVolunteers
+y.test = test_data$log_item
+x.grid <- seq(range(x.test)[1], range(x.test)[2], by=1)
 preds <- predict(fit, list(x=x.grid), se=T)
-plot(x, y ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", main="")
-lines(x.grid, preds$fit ,lwd =2, col =" blue")
+plot(x.test, y.test ,xlim=range(x.grid) ,cex =.5, col =" darkgrey ", 
+     main="Polynomial Regression", xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, preds$fit ,lwd=3, col ="deepskyblue")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
-matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+matlines(x.grid, se.bands, lwd =2, col ="blue", lty =3)
 
 # diagnostic : not so good
 summary(fit)
@@ -235,6 +238,9 @@ dev.off()
 # Step functions ----------------------------------------------------------
 x <- train_data$TotalVolunteers
 y <- train_data$log_item
+x.test = test_data$TotalVolunteers
+y.test = test_data$log_item
+x.grid <- seq(range(x)[1], range(x)[2], by=1)
 # Even bins - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 table(cut(x,10))
@@ -243,12 +249,12 @@ table(cut(x,10))
 fit3 <- lm(y ~ cut(x,10))
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=1)
 preds <- predict(fit3, list(x=x.grid), se=T)
-plot(x, y, xlim=range(x.grid), ylim = c(2.8,10), cex =.5, col =" darkgrey ", main="")
-lines(x.grid, preds$fit, lwd =2, col ="blue")
+plot(x, y, xlim=range(x.grid), ylim=c(3,10), cex =.5, col =" darkgrey ", 
+     main="Even Bins", xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, preds$fit, lwd =3, col ="darkorange")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
-matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+matlines(x.grid, se.bands, lwd =2, col ="orangered3", lty =2)
 
 # diagnostic : very bad 
 summary(fit3)
@@ -266,12 +272,13 @@ table(cut(x, breaks = br))
 fit4 <- lm(y ~ cut(x, breaks = br))
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=1)
+x.grid <- seq(range(x.test)[1], range(x.test)[2], by=1)
 preds <- predict(fit4, list(x=x.grid), se=T)
-plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
-lines(x.grid, preds$fit, lwd =2, col ="blue")
+plot(x.test, y.test, xlim=range(x.grid), ylim=c(3,10), cex =.5, col =" darkgrey ", 
+     main="Uneven Bins", xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, preds$fit, lwd =3, col ="darkorange")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
-matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+matlines(x.grid, se.bands, lwd =2, col ="orangered3", lty =2)
 
 # diagnostic : not very good
 summary(fit4)
@@ -288,12 +295,13 @@ dev.off()
 fit5 <- npreg(x, y, ckertype='gaussian', bws=5) # anche bws = 3 non sembra male
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=1)
+x.grid <- seq(range(x.test)[1], range(x.test)[2], by=1)
 preds <- predict(fit5, list(x=x.grid), se=T)
-plot(x, y, xlim=range(x.grid), cex =.5, col =" darkgrey ", main="")
-lines(x.grid, preds$fit, lwd =2, col ="blue")
+plot(x.test, y.test, xlim=range(x.grid), cex =.5, col =" darkgrey ", 
+     main="Gaussian Kernel", xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, preds$fit, lwd=3, col ="deeppink")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
-matlines(x.grid, se.bands, lwd =1, col =" blue", lty =3)
+matlines(x.grid, se.bands, lwd=2, col ="deeppink4", lty=3)
 
 summary(fit5)
 
@@ -325,25 +333,27 @@ summary(fit6)
 
 
 # Natural Splines ---------------------------------------------------------
-knots = quantile(x, probs=c(seq(0.25, 0.95, by=0.1)))
-boundary_knots <- quantile(x, probs=c(0.001, 0.99))
+knots = quantile(x, probs=c(seq(0.35, 0.95, by=0.1), 0.98, 0.99, 0.996))
+boundary_knots <- quantile(x, probs=c(0.01, 0.999))
 knots
 boundary_knots
 
 fit7 = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots))
 
 # plot
-x.grid <- seq(range(x)[1], range(x)[2], by=1)
+x.grid <- seq(range(x.test)[1], range(x.test)[2], by=1)
 preds = predict(fit7, list(x=x.grid), se=T)
-plot(x, y, xlim=range(x.grid), cex =.5, col="darkgrey")
-lines(x.grid, preds$fit, lwd =2, col ="blue")
+plot(x.test, y.test, xlim=range(x.grid), cex =.5, col="darkgrey",
+     main="Natural Splines", xlab='Total Volunteers', ylab='Collected Items')
+lines(x.grid, preds$fit, lwd=3, col ="darkgreen")
 se.bands = cbind(preds$fit + 2*preds$se.fit , preds$fit - 2*preds$se.fit)
-matlines(x.grid, se.bands, lwd =1, col ="blue", lty =3)
+matlines(x.grid, se.bands, lwd =2, col ="chartreuse4", lty =3)
 # visualize knots
 knots_pred = predict(fit7, list(x=knots))
-points(knots, knots_pred, col='blue', pch=19)
+points(knots, knots_pred, col='chartreuse4', pch=19)
 boundary_pred = predict(fit7, list(x=boundary_knots))
-points(boundary_knots, boundary_pred, col='red', pch=19)
+points(boundary_knots, boundary_pred, col='red3', pch=19)
+legend('bottomright', c('Knots', 'Boundary Knots'), pch=c(19,19), col=c('green4', 'red3'))
 
 # diagnostic : not bad
 summary(fit7)
@@ -378,8 +388,9 @@ model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots)
 prova = test_data
 preds = predict(model_ns, list(x=prova$TotalVolunteers, EventType=prova$EventType, 
                                weekend=prova$weekend, Season=prova$Season), se=T)
-plot(prova$TotalVolunteers, prova$log_item, cex =.5, col="darkgrey", ylim=c(2,10))
-points(prova$TotalVolunteers, preds$fit, pch=16,cex=.5, col ="blue")
+plot(prova$TotalVolunteers, prova$log_item, cex =.5, col="darkgrey", ylim=c(3,10),
+     main="Natural Splines", xlab='Total Volunteers', ylab='Collected Items')
+points(prova$TotalVolunteers, preds$fit, pch=16, cex=.6, col ="red3")
 
 # diagnostic : with regressor improved R2 + better fit
 summary(model_ns)
@@ -395,48 +406,6 @@ RMSE # 0.8995
 
 
 
-
-# Adding AREA variable as offset variable
-
-# NOTA : Ho tolto l'Area dal dataset perchè era inconcludente
-#        Quindi questo pezzo di codice NON FUNZIONA!!
-
-area_std = train_data$Area/50
-train_data$Area_std = area_std
-area_std = test_data$Area/50
-test_data$Area_std = area_std
-
-# new model
-model_ns = lm(y ~ ns(x, knots=knots, Boundary.knots=boundary_knots) 
-              + EventType + weekend + Season, offset = Area_std, data=train_data)
-
-# plot considering TEST data (2018)
-prova = test_data
-preds = predict(model_ns, list(x=prova$TotalVolunteers, EventType=prova$EventType, 
-                               weekend=prova$weekend, Season=prova$Season, Area_std=prova$Area_std), se=T)
-
-plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10))
-points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
-
-# diagnostic 
-summary(model_ns)
-
-par(mfrow=c(2,2))
-plot(model_ns)
-dev.off()
-
-# errore medio su tutti i dati test
-RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
-RMSE 
-
-
-# PER I RAGA : alla fine il fitting è un po' peggiore quindi eviterei l'area
-#              cerchiamo di usare conformal per avere CI più ampio piuttosto
-
-
-
-
-
 # Poly --------------------------------------------------------------------
 
 x <- train_data$TotalVolunteers
@@ -448,8 +417,9 @@ model_poly <- lm(y ~ poly(x , degree=8)+ EventType + weekend + Season, data=trai
 prova = test_data
 preds = predict(model_poly, list(x=prova$TotalVolunteers, EventType=prova$EventType, 
                                weekend=prova$weekend, Season=prova$Season), se=T)
-plot(prova$TotalVolunteers, prova$log_item, cex =.8, col="darkgrey", ylim=c(2,10))
-points(prova$TotalVolunteers, preds$fit, cex=.8, col ="blue")
+plot(prova$TotalVolunteers, prova$log_item, cex =.5, col="darkgrey", ylim=c(3,10),
+     main="Polynomial Regression", xlab='Total Volunteers', ylab='Collected Items')
+points(prova$TotalVolunteers, preds$fit, cex=.6, col ="blue", pch=16)
 
 # diagnostic : with regressor improved R2 + better fit
 summary(model_poly)

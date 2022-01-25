@@ -22,6 +22,7 @@ library(RobStatTM)
 # Data Analysis -----------------------------------------------------------
 
 CleanUsa = import("CleanUsa.Rdata")
+View(CleanUsa)
 
 plastic.perc = CleanUsa$`%Plastic&Foam`/100
 plastic.items = round(CleanUsa$TotalClassifiedItems_EC2020 * plastic.perc)
