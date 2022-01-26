@@ -63,6 +63,7 @@ bagplot(clean_data, show.whiskers = F, cex=0.6, main='Bagplot', col ) # very bet
 ddPlot(x = clean_data, y = outlying_obs, depth_params = list(method='Tukey'), scale = T)
 
 # Clean data overview
+par(mfrow=c(1,2))
 plot(clean_data$TotalVolunteers, clean_data$TotalItems, pch=21, col='black', bg='orange',
      cex=0.8, main='Data without Outliers', xlab='Total Volunteers', ylab='Collected Items')
 plot(clean_data$TotalVolunteers, log(clean_data$TotalItems), pch=21, col='black', bg='turquoise', 
