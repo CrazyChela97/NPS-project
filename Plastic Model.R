@@ -91,18 +91,25 @@ abline(fit_lts, col="blue", lwd=3)
 legend("topleft", c('OLS', 'LMS', 'LTS'), lwd=rep(3,3), 
        col=c("red3", "darkorange", "blue"))
 
-
 # graphical analysis
 plot(fit_lts) 
+
 # performances
 summary(fit_lm)
-summary(fit_lms)
 summary(fit_lts)
+
+# prediction
+pred = predict(fit_lms, list(log_item = x.test))
+plot(x.test, y.test, col='darkgrey')
+lines(x.test, pred, col='darkblue')
+
+
 
 
 # CONFIDENCE INTERVALS 
 
-# LM_ROB SE
+# LM_ROB using SE
+fit_rob = lmrob(log_plastic ~ log_item, data=train_data, method = 'MM')
 pred = predict(fit_rob, list(log_item = x.grid), se=TRUE)
 plot(x.test, y.test, col='darkgrey')
 lines(x.grid, pred$fit, col='red', lwd=2)
@@ -110,31 +117,29 @@ se.bands <- cbind(pred$fit + 2*pred$se.fit, pred$fit - 2*pred$se.fit)
 matlines(x.grid, se.bands, lwd =1, col =" blue", lty =2)
 legend('topleft', c('fitted values', 'lm_rob CI (using SE)', 'using residual.scale'), lwd=c(2,2,2),
        lty=c(1,2,1), col=c('red', 'blue', 'darkorange'))
+# The obtained intervals are very tight and overlap the prediction line
 
-# troppo troppo strette si sovrappongono a fit
-range(pred$se.fit) # infatti sono strettissimi
-
-lines(x.grid, pred$fit+pred$residual.scale, col='darkorange', lwd=2)
-lines(x.grid, pred$fit-pred$residual.scale, col='darkorange', lwd=2)
-# questi più bellini ma non so quanto abbia senso
-help(lmrob)
+# Looking at the standard errors
+range(pred$se.fit) 
+# Indeed the standard errors are very very small, practically zero
 
 
-# BOOTSTRAP per CI
 
+# BOOTSTRAP APPROACH
+fit_lms$coefficients
 # Naive Bootstrap for the intercept
-pred = fit_lts$fitted.values
+pred = predict(fit_lms)
 fitted.obs = pred
 res.obs = y.train - fitted.obs
-L.obs = summary(fit_lts)$coefficients[1,1]
+L.obs = fit_lms$coefficients[1]
 B = 2000
 alpha = 0.01 # provare ?
 T.boot = numeric(B)
 set.seed(2022)
 for(b in 1:B) {
   response.b = fitted.obs + sample(res.obs, replace = T)
-  fm.b = ltsReg(response.b ~ x.train, alpha=.75, mcd=TRUE)
-  T.boot[b] = summary(fm.b)$coefficients[1,1]
+  fm.b = lmsreg(response.b ~ x.train)
+  T.boot[b] = fm.b$coefficients[1]
 }
 
 # Reverse Percentile Intervals
@@ -146,11 +151,13 @@ CI.RP
 
 # plot
 plot(x.train, y.train, col='darkgrey')
-C2 = summary(fit_lts)$coefficients[2,1]
-lines(x.train, fit_lts$fitted.values, col='red')
+C2 = fit_lms$coefficients[2]
+lines(x.train, pred, col='red')
 lines(x.train, CI.RP[1]+ x.train*C2, col='blue')
 lines(x.train, CI.RP[2]+ x.train*C2, col='blue')
 legend('topleft', c('fitted values', 'bootstrap CI'), lwd=c(2,2), col=c('red', 'blue'))
+# Also in this case very tight, probably because we have lots of data
+
 
 # Robust Regression : others -------------------------------------------------------
 

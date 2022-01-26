@@ -95,7 +95,6 @@ for (k in 1:c){
   plot(dati$TotalVolunteers, dati$log_item, main=cat[k])
 }
 
-colors = c('turquoise', 'orange', 'deeppink', 'greenyellow')
 
 # EVENT TYPE
 cat = levels(factor(data$EventType))
@@ -135,18 +134,6 @@ for (k in 1:c){
 
 dev.off()
 
-# EventType con colori by cami
-Land=data[which(data$EventType=='Land Cleanup'),]
-Marine=data[which(data$EventType=='Marine Debris'),]
-Under=data[which(data$EventType=='Underwater Cleanup'),]
-Water=data[which(data$EventType=='Watercraft Cleanup'),]
-
-plot(Land$TotalVolunteers, Land$log_item, pch=16, cex=0.5, col = 'forestgreen')
-points(Marine$TotalVolunteers, Marine$log_item, pch=16, cex=0.5,col = 'gold')
-points(Water$TotalVolunteers, Water$log_item, pch=16, cex=0.5, col = 'lightskyblue')
-points(Under$TotalVolunteers, Under$log_item, pch=16, cex=0.5,col = 'firebrick3')
-
-
 
 
 # Training vs Test Data ---------------------------------------------------
@@ -156,26 +143,6 @@ points(Under$TotalVolunteers, Under$log_item, pch=16, cex=0.5,col = 'firebrick3'
 
 test_data = data[which(data$Year == 2018), ]
 train_data = data[which(data$Year == 2016 | data$Year == 2017), ]
-
-
-# GAM Model -----------------------------------------------------------
-
-gam_model = gam(log_Items ~ s(TotalVolunteers, by=factor(Season), bs='cr') + Area + 
-                  weekend + EventType + as.factor(Year), data=CleanUsa)
-summary(gam_model) 
-# dal summary sembra tutto bellino
-
-par(mfrow=c(2,2))
-plot(gam_model)
-dev.off()
-# il plot non ha alcun senso
-
-plot(data$TotalVolunteers, data$log_item)
-par(new=TRUE)
-par(mfrow=c(2,2))
-plot(gam_model, col='red')
-
-
 
 
 # NONPARAMETRIC REGRESSION : Basic ------------------------------------------------
@@ -190,7 +157,7 @@ y <- train_data$log_item
 # Choose the degree of the polynomial
 m_list <- lapply(1:10, function(degree){lm(y ~ poly(x, degree=degree), data=data)})
 do.call(anova, m_list)
-# taking degree 8 since it's the last significant one
+# taking degree = 8 since it's the last significant one
 
 fit <- lm(y ~ poly(x , degree=8), data=data) 
 
@@ -205,23 +172,24 @@ lines(x.grid, preds$fit ,lwd=3, col ="deepskyblue")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
 matlines(x.grid, se.bands, lwd =2, col ="blue", lty =3)
 
-# diagnostic : not so good
+# diagnostic 
 summary(fit)
 # R2 = 0.5681
+
 par(mfrow=c(2,2))
 plot(fit)
 dev.off()
 
 
 
-# Rifaccio il modello con poly togliendo il dato #2989 che ha elevata Leverage
+# Removing observation #2989 which presents a high Leverage value
 data2 <- train_data[-2989,]
 x <- data2$TotalVolunteers
 y <- data2$log_item
 m_list <- lapply(1:10, function(degree){lm(y ~ poly(x, degree=degree), data=data2)})
 do.call(anova, m_list)
 
-fit2 <- lm(y ~ poly(x , degree=8), data=data) # offset = Area
+fit2 <- lm(y ~ poly(x , degree=8), data=data) 
 
 # plot
 x.grid <- seq(range(x)[1], range(x)[2], by=1)
@@ -261,7 +229,7 @@ lines(x.grid, preds$fit, lwd =3, col ="darkorange")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
 matlines(x.grid, se.bands, lwd =2, col ="orangered3", lty =2)
 
-# diagnostic : very bad 
+# diagnostic 
 summary(fit3)
 
 par(mfrow=c(2,2))
@@ -285,7 +253,7 @@ lines(x.grid, preds$fit, lwd =3, col ="darkorange")
 se.bands <- cbind(preds$fit +2* preds$se.fit ,preds$fit -2* preds$se.fit)
 matlines(x.grid, se.bands, lwd =2, col ="orangered3", lty =2)
 
-# diagnostic : not very good
+# diagnostic 
 summary(fit4)
 ad.test(fit4$residuals)
 
@@ -360,10 +328,11 @@ boundary_pred = predict(fit7, list(x=boundary_knots))
 points(boundary_knots, boundary_pred, col='red3', pch=19)
 legend('bottomright', c('Knots', 'Boundary Knots'), pch=c(19,19), col=c('green4', 'red3'))
 
-# diagnostic : not bad
+# diagnostic 
 summary(fit7)
 ad.test(fit7$residuals)
 # R2 = 0.571
+
 par(mfrow=c(2,2))
 plot(fit7)
 dev.off()
@@ -374,7 +343,6 @@ dev.off()
 
 # Adding regressors to the best performing models, that is:
 # - NATURAL SPLINES
-# - GAUSSIAN KERNEL REGRESSION : non so aggiungere ??
 # - POLY
 
 
@@ -400,11 +368,12 @@ points(prova$TotalVolunteers, preds$fit, pch=16, cex=.6, col ="red3")
 # diagnostic : with regressor improved R2 + better fit
 summary(model_ns)
 # R2 = 0.582 , Radj = 0.580
+
 par(mfrow=c(2,2))
 plot(model_ns)
 dev.off()
 
-# errore su tutti i dati test
+# RMSE over all the data TEST (2018)
 RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
 RMSE # 0.901
 
@@ -430,11 +399,12 @@ points(prova$TotalVolunteers, preds$fit, cex=.6, col ="blue", pch=16)
 # diagnostic : with regressor improved R2 + better fit
 summary(model_poly)
 # R2 = 0.5795 , Radj = 0.5781
+
 par(mfrow=c(2,2))
 plot(model_poly)
 dev.off()
 
-# errore su tutti i dati test
+# RMSE over all the data TEST (2018)
 RMSE = sqrt(sum((prova$log_item - preds$fit)^2)/length(prova$log_item))
 RMSE # 0.899
 
