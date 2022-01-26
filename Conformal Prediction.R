@@ -220,3 +220,4 @@ exc.perc.ns = excluded/length(y.test)
 exc.perc.ns # 5.7 %
 
 
+

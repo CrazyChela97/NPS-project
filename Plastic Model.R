@@ -244,11 +244,6 @@ lines(ellipse(x = sample_cov, centre=sample_mean), col="blue",lwd=2)
 points(x=sample_mean[1],y=sample_mean[2], col="blue", pch=16, cex=1.5)
 legend("topleft", c('Robust', 'Classical'), lwd=rep(2,2), col=c("red", "blue"))
 
-# Esempio -----------------------------------------------------------------
-
-
-
-
 
 
 
