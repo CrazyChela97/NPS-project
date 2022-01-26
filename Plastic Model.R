@@ -126,14 +126,13 @@ range(pred$se.fit)
 
 
 # BOOTSTRAP APPROACH
-fit_lms$coefficients
 # Naive Bootstrap for the intercept
 pred = predict(fit_lms)
 fitted.obs = pred
 res.obs = y.train - fitted.obs
 L.obs = fit_lms$coefficients[1]
-B = 2000
-alpha = 0.01 # provare ?
+B = 1000
+alpha = 0.05 # provare ?
 T.boot = numeric(B)
 set.seed(2022)
 for(b in 1:B) {
@@ -155,7 +154,7 @@ C2 = fit_lms$coefficients[2]
 lines(x.train, pred, col='red')
 lines(x.train, CI.RP[1]+ x.train*C2, col='blue')
 lines(x.train, CI.RP[2]+ x.train*C2, col='blue')
-legend('topleft', c('fitted values', 'bootstrap CI'), lwd=c(2,2), col=c('red', 'blue'))
+legend('topleft', c('LMS Prediction', 'Bootstrap RPCI'), lwd=c(2,2), col=c('red', 'blue'))
 # Also in this case very tight, probably because we have lots of data
 
 
