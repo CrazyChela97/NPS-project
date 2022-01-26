@@ -50,8 +50,9 @@ train_data = data[which(data$Year == 2016 | data$Year == 2017), ]
 # Total Items Prediction --------------------------------------------------
 
 n = dim(test_data)[1]
-set.seed(1997)
+set.seed(12101997)
 obs = sample(1:n, 1)
+View(test_data[obs, ])
 
 x.train = train_data$TotalVolunteers
 y.train = train_data$log_item
@@ -107,25 +108,19 @@ real_plastic = test_data$log_plastic[obs]
 
 
 # Final Results -----------------------------------------------------------
-# Trasforming back the values with exp
 
 # total items
-predicted_TI = c(exp(CI[1]), exp(c_preds_ns$pred), exp(CI[2]))
-real_TI = exp(real)
+predicted_TI = c(CI[1], c_preds_ns$pred, CI[2])
+real_TI = real
 predicted_TI
 real_TI
 
 # plastic
-pred_p = exp(pred)
+pred_p = pred
 pred_p
-real_p = exp(real_plastic)
+real_p = real_plastic
 real_p
 
-# others
-pred_others = exp(c_preds_ns$pred) - exp(pred)
-pred_others 
-real_others = exp(test_data$log_others[obs])
-real_others
 
 
 
